@@ -288,21 +288,29 @@ class MathHelper
         if (!is_numeric($i)) {
             throw new \Exception("Cast To Byte Error - param \$i no numeric");
         }
-        if (extension_loaded('gmp')) {
-            // optimisation gmp res
-            if (gmp_cmp($i, 127) > 0) {
-                return gmp_strval(gmp_sub(gmp_mod(gmp_add($i, 128), 256), 128));
-            } elseif (gmp_cmp($i, -128) < 0) {
-                return gmp_strval(gmp_add(gmp_mod(gmp_sub($i, 128), 256), -128));
-            }
-        } else {
-            if (self::cmp($i, 127) > 0) {
-                return self::sub(self::mod(self::add($i, 128), 256), 128);
-            } elseif (self::cmp($i, -128) < 0) {
-                return self::add(self::mod(self::sub($i, 128), 256), -128);
-            }
+//        $i = (int)($i & 0xff);
+        if ($i > 127) {
+            return (($i + 128) & 0xff) - 128;
+        } elseif ($i < -128) {
+            return (($i - 128) & 0xff) + -128;
         }
         return $i;
+//        return pack('c', $i);
+//        if (extension_loaded('gmp')) {
+//            // optimisation gmp res
+//            if (gmp_cmp($i, 127) > 0) {
+//                return gmp_strval(gmp_sub(gmp_mod(gmp_add($i, 128), 256), 128));
+//            } elseif (gmp_cmp($i, -128) < 0) {
+//                return gmp_strval(gmp_add(gmp_mod(gmp_sub($i, 128), 256), -128));
+//            }
+//        } else {
+//            if (self::cmp($i, 127) > 0) {
+//                return self::sub(self::mod(self::add($i, 128), 256), 128);
+//            } elseif (self::cmp($i, -128) < 0) {
+//                return self::add(self::mod(self::sub($i, 128), 256), -128);
+//            }
+//        }
+//        return $i;
     }
 
     /**

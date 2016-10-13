@@ -125,7 +125,9 @@ abstract class Buffer
     /**
      * Modifies this buffer's byte order.
      *
-     * @param string $order The new byte order, either BIG_ENDIAN or LITTLE_ENDIAN
+     * @param string $order The new byte order, either Buffer::BIG_ENDIAN or Buffer::LITTLE_ENDIAN
+     * @see Buffer::BIG_ENDIAN
+     * @see Buffer::LITTLE_ENDIAN
      */
     public final function setOrder($order)
     {
@@ -137,9 +139,11 @@ abstract class Buffer
      *
      * The byte order is used when reading or writing multibyte values, and
      * when creating buffers that are views of this byte buffer.  The order of
-     * a newly-created byte buffer is always BIG_ENDIAN
+     * a newly-created byte buffer is always Buffer::BIG_ENDIAN
      *
      * @return string This buffer's byte order
+     * @see Buffer::BIG_ENDIAN
+     * @see Buffer::LITTLE_ENDIAN
      */
     public final function order()
     {
@@ -147,9 +151,11 @@ abstract class Buffer
     }
 
     /**
-     * Buffer's byte order is LITTLE_ENDIAN
+     * Buffer's byte order is Buffer::LITTLE_ENDIAN
      *
      * @return bool
+     * @see Buffer::BIG_ENDIAN
+     * @see Buffer::LITTLE_ENDIAN
      */
     protected final function isOrderLE()
     {

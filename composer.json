@@ -1,7 +1,6 @@
 {
   "name": "nelexa/buffer",
   "description": "Buffer read and write binary files",
-  "minimum-stability": "dev",
   "license": "MIT",
   "authors": [
     {
@@ -10,14 +9,19 @@
     }
   ],
   "require": {
-    "php": ">=5.3"
+    "php-64bit": ">=5.4"
   },
   "require-dev": {
-    "phpunit/phpunit": "^4.8"
+    "phpunit/phpunit": "4.8"
   },
   "autoload": {
     "psr-4": {
-      "": "src"
+      "": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "": "tests/"
     }
   }
 }
