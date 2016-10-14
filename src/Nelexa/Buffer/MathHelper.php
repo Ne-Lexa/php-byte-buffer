@@ -288,11 +288,11 @@ class MathHelper
         if (!is_numeric($i)) {
             throw new \Exception("Cast To Byte Error - param \$i no numeric");
         }
-//        $i = (int)($i & 0xff);
+        $i = (int)($i & 0xff);
         if ($i > 127) {
             return (($i + 128) & 0xff) - 128;
         } elseif ($i < -128) {
-            return (($i - 128) & 0xff) + -128;
+            return $i & 0x7f;
         }
         return $i;
 //        return pack('c', $i);

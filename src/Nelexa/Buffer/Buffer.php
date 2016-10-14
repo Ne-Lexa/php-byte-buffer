@@ -244,7 +244,7 @@ abstract class Buffer
      */
     public function getByte()
     {
-        return MathHelper::castToByte($this->getUnsignedByte());
+        return Cast::toByte($this->getUnsignedByte());
     }
 
     /**
@@ -262,7 +262,7 @@ abstract class Buffer
      */
     public function getShort()
     {
-        return MathHelper::castToShort($this->getUnsignedShort());
+        return Cast::toShort($this->getUnsignedShort());
     }
 
     /**
@@ -280,7 +280,7 @@ abstract class Buffer
      */
     public function getInt()
     {
-        return MathHelper::castToInt($this->getUnsignedInt());
+        return Cast::toInt($this->getUnsignedInt());
     }
 
     /**
@@ -300,12 +300,12 @@ abstract class Buffer
     {
         list($n1, $n2) = array_values(unpack($this->isOrderLE() ? 'V2' : 'N2', $this->get(8)));
         if ($this->isOrderLE()) {
-            $n2 = MathHelper::castToInt($n2);
-            $n1 = MathHelper::bitwiseAnd(MathHelper::castToInt($n1), '4294967295');
+            $n2 = Cast::toInt($n2);
+            $n1 = MathHelper::bitwiseAnd(Cast::toInt($n1), '4294967295');
             return MathHelper::bitwiseOr(MathHelper::leftShift64($n2, 32), $n1);
         } else {
-            $n1 = MathHelper::castToInt($n1);
-            $n2 = MathHelper::bitwiseAnd(MathHelper::castToInt($n2), '4294967295');
+            $n1 = Cast::toInt($n1);
+            $n2 = MathHelper::bitwiseAnd(Cast::toInt($n2), '4294967295');
             return MathHelper::bitwiseOr(MathHelper::leftShift64($n1, 32), $n2);
         }
     }
@@ -454,9 +454,9 @@ abstract class Buffer
         $higher = MathHelper::rightShift64(MathHelper::bitwiseAnd($v, $highMap), 32);
         $lower = MathHelper::bitwiseAnd($v, $lowMap);
         if ($this->isOrderLE()) {
-            return pack('VV', MathHelper::castToInt($lower), MathHelper::castToInt($higher));
+            return pack('VV', Cast::toInt($lower), Cast::toInt($higher));
         }
-        return pack('NN', MathHelper::castToInt($higher), MathHelper::castToInt($lower));
+        return pack('NN', Cast::toInt($higher), Cast::toInt($lower));
     }
 
     /**
