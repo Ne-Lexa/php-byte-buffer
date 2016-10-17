@@ -10,16 +10,6 @@ class FileBuffer extends ResourceBuffer
      */
     function __construct($file, $readOnly = false)
     {
-        $this->setFile($file, $readOnly);
-    }
-
-    /**
-     * @param string $file
-     * @param bool $readOnly
-     * @throws BufferException
-     */
-    public function setFile($file, $readOnly = true)
-    {
         if ($file === null) {
             throw new BufferException("file is null");
         }
@@ -29,13 +19,12 @@ class FileBuffer extends ResourceBuffer
         if (!$readOnly && !is_writable(dirname($file))) {
             throw new BufferException("file '" . $file . "' is not writable.");
         }
-        $fileSize = file_exists($file) ? filesize($file) : 0;
 
-        $mode = $readOnly ? "rb" : (file_exists($file) ? 'r' : 'w') . "b+";
+        $mode = $readOnly ? "rb" : (file_exists($file) ? 'r+' : 'w+') . "b";
 
         if (($fp = fopen($file, $mode)) === false) {
             throw new BufferException("file '" . $file . "' can not open.");
         }
-        $this->setResource($fp, $fileSize, $readOnly);
+        parent::__construct($fp, $readOnly);
     }
 }

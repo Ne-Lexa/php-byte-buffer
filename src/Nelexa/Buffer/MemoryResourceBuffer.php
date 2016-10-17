@@ -14,20 +14,11 @@ class MemoryResourceBuffer extends ResourceBuffer
         if ($bytes === null) {
             throw new BufferException("null Bytes");
         }
-        $this->setBytes($bytes);
-    }
-
-    /**
-     * @param string $bytes
-     * @throws BufferException
-     */
-    public function setBytes($bytes)
-    {
-        $length = strlen($bytes);
         if (($fp = fopen("php://memory", "wb+")) === false) {
             throw new BufferException("can not open memory");
         }
-        fwrite($fp, $bytes, $length);
-        $this->setResource($fp, $length, false);
+        fwrite($fp, $bytes);
+        rewind($fp);
+        parent::__construct($fp, false);
     }
 }

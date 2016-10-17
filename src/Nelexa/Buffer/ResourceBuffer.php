@@ -1,7 +1,7 @@
 <?php
 namespace Nelexa\Buffer;
 
-abstract class ResourceBuffer extends Buffer
+class ResourceBuffer extends Buffer
 {
     /**
      * @var resource
@@ -10,22 +10,20 @@ abstract class ResourceBuffer extends Buffer
 
     /**
      * @param resource $resource
-     * @param $size int
      * @param bool $readOnly
      * @throws BufferException
      */
-    function __construct($resource, $size, $readOnly = false)
+    function __construct($resource, $readOnly = false)
     {
-        $this->setResource($resource, $size, $readOnly);
+        $this->setResource($resource, $readOnly);
     }
 
     /**
      * @param resource $resource
-     * @param int $size
      * @param bool $readOnly
      * @throws BufferException
      */
-    protected function setResource($resource, $size, $readOnly = true)
+    protected function setResource($resource, $readOnly = true)
     {
         parent::setReadOnly($readOnly);
         if ($resource === null) {
@@ -34,12 +32,19 @@ abstract class ResourceBuffer extends Buffer
         if (!is_resource($resource)) {
             throw new BufferException("invalid type \$resource - is not resource");
         }
-        if (!stream_is_local($resource)) {
-            throw new BufferException("invalid argument \$resource - is not local resource");
+        if ($readOnly && !stream_is_local($resource)) {
+            throw new BufferException("invalid argument \$resource - read only resource is not local");
+        }
+        $meta = stream_get_meta_data($resource);
+        if (!$meta['seekable']) {
+            throw new BufferException("\$resource cannot seekable stream.");
+        }
+        $stats = fstat($resource);
+        if (isset($stats['size'])) {
+            $this->newLimit($stats['size']);
         }
         $this->resource = $resource;
         $this->setPosition(0);
-        $this->newLimit($size);
     }
 
     /**
@@ -60,7 +65,7 @@ abstract class ResourceBuffer extends Buffer
      */
     public function setReadOnly($isReadOnly)
     {
-        throw new BufferException("Not Support Set Read Only in runtime. Use method setResource(\$resource, \$size, \$readOnly)");
+        throw new BufferException("Not Support Set Read Only in runtime. Use method setResource(\$resource, \$readOnly)");
     }
 
     /**
@@ -107,7 +112,7 @@ abstract class ResourceBuffer extends Buffer
         if (!is_numeric($position)) {
             throw new BufferException("position " . $position . " is not numeric");
         }
-        if (fseek($this->resource, $position, SEEK_SET) == 0) {
+        if (fseek($this->resource, $position, SEEK_SET) === 0) {
             parent::setPosition($position);
         } else {
             throw new BufferException("set position " . $position . " failure");
@@ -254,6 +259,7 @@ abstract class ResourceBuffer extends Buffer
             throw new BufferException("Read Only");
         }
         ftruncate($this->resource, 0);
+        $this->rewind();
         $this->newLimit(0);
     }
 

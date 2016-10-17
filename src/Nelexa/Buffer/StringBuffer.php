@@ -2,7 +2,8 @@
 namespace Nelexa\Buffer;
 
 /**
- * StringBuffer class for binary safe operation with strings (Like Java ByteBuffer Or Java DataInputStream and DataOutputStream).
+ * StringBuffer class for binary safe operation with strings
+ * (Like Java ByteBuffer Or Java DataInputStream and DataOutputStream).
  */
 class StringBuffer extends Buffer
 {

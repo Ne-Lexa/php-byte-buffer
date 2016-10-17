@@ -298,15 +298,17 @@ abstract class Buffer
      */
     public function getLong()
     {
-        list($n1, $n2) = array_values(unpack($this->isOrderLE() ? 'V2' : 'N2', $this->get(8)));
+        $data = $this->get(8);
+        if (version_compare(PHP_VERSION, '5.6.3') >= 0) {
+            return current(unpack($this->isOrderLE() ? 'P' : 'J', $data));
+        }
         if ($this->isOrderLE()) {
-            $n2 = Cast::toInt($n2);
-            $n1 = MathHelper::bitwiseAnd(Cast::toInt($n1), '4294967295');
-            return MathHelper::bitwiseOr(MathHelper::leftShift64($n2, 32), $n1);
-        } else {
-            $n1 = Cast::toInt($n1);
-            $n2 = MathHelper::bitwiseAnd(Cast::toInt($n2), '4294967295');
-            return MathHelper::bitwiseOr(MathHelper::leftShift64($n1, 32), $n2);
+            $unpack = unpack('Va/Vb', $data);
+            return $unpack['a'] + ($unpack['b'] << 32);
+        }
+        else{
+            $unpack = unpack('Na/Nb', $data);
+            return ($unpack['a'] << 32) | $unpack['b'];
         }
     }
 
@@ -446,17 +448,22 @@ abstract class Buffer
         if ($v === null) {
             throw new BufferException("null long");
         }
-        if ($v === null) {
-            throw new BufferException("null long");
+        if (version_compare(PHP_VERSION, '5.6.3') >= 0) {
+            return pack($this->isOrderLE() ? "P" : "J", $v);
         }
-        $highMap = '-4294967296';
-        $lowMap = '4294967295';
-        $higher = MathHelper::rightShift64(MathHelper::bitwiseAnd($v, $highMap), 32);
-        $lower = MathHelper::bitwiseAnd($v, $lowMap);
-        if ($this->isOrderLE()) {
-            return pack('VV', Cast::toInt($lower), Cast::toInt($higher));
+
+        $left = 0xffffffff00000000;
+        $right = 0x00000000ffffffff;
+        if($this->isOrderLE()) {
+            $r = ($v & $left) >> 32;
+            $l = $v & $right;
+            return pack('VV', $l, $r);
         }
-        return pack('NN', Cast::toInt($higher), Cast::toInt($lower));
+        else{
+            $l = ($v & $left) >>32;
+            $r = $v & $right;
+            return pack('NN', $l, $r);
+        }
     }
 
     /**
