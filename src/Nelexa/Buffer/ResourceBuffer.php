@@ -54,7 +54,7 @@ class ResourceBuffer extends Buffer
     {
         $position = $this->position();
         $this->rewind();
-        $content = stream_get_contents($this->resource);
+        $content = stream_get_contents($this->resource, $this->size());
         $this->setPosition($position);
         return $content;
     }
@@ -79,6 +79,7 @@ class ResourceBuffer extends Buffer
     public function flip()
     {
         $this->newLimit($this->position());
+        ftruncate($this->resource, $this->size());
         $this->setPosition(0);
     }
 
