@@ -6,7 +6,7 @@ use Nelexa\Buffer\Buffer;
 use Nelexa\Buffer\BufferException;
 use Nelexa\Buffer\FileBuffer;
 
-class BinaryFileIcoGetInfoTest extends \PHPUnit_Framework_TestCase
+class GetInfoIcoFileTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @see https://en.wikipedia.org/wiki/ICO_(file_format)

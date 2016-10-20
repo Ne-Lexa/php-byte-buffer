@@ -2,6 +2,9 @@
 namespace Nelexa\Buffer;
 
 
+use Nelexa\Buffer\BinaryFormat\BinaryFileItem;
+use Nelexa\Buffer\BinaryFormat\BinaryFileTestFormat;
+
 abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
 {
 
@@ -33,9 +36,7 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
     {
         parent::tearDown();
 
-        if ($this->buffer instanceof ResourceBuffer) {
-            $this->buffer->close();
-        }
+        $this->buffer->close();
     }
 
     public function testBaseFunctional()
@@ -263,6 +264,19 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->buffer->getLong(), 98765);
     }
 
+    public function testReplaceFunctional()
+    {
+        $this->buffer->insertString('123456789');
+        $this->buffer->setPosition(3);
+        $this->buffer->replaceBoolean(true, 3);
+        $this->assertEquals('123789', $this->buffer->toString());
+        $this->buffer->skip(-1);
+        $this->buffer->replaceString('', 1);
+        $this->assertEquals('123789', $this->buffer->toString());
+        $this->buffer->replaceString('456', 0);
+        $this->assertEquals('123456789', $this->buffer->toString());
+    }
+
     /**
      * @expectedException \Nelexa\Buffer\BufferException
      * @expectedExceptionMessage put length > remaining
@@ -283,5 +297,24 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $this->buffer->replaceString('Test', 5);
     }
 
+    public function testBinaryFile()
+    {
+        $name = "General Name";
+        $items = [
+            BinaryFileItem::create(time() * 1000, ["Category 1", "Category 2"]),
+            BinaryFileItem::create((time() - 3600) * 1000, ["Category 2", "Category 3"]),
+            BinaryFileItem::create((time() - 52222) * 1000, ["Category 4", "Category 2", "Category 7"])
+        ];
+
+        $binaryFileActual = BinaryFileTestFormat::create($name, $items);
+        $binaryFileActual->writeObject($this->buffer);
+        $output = $this->buffer->toString();
+
+        $buffer = new StringBuffer($output);
+        $binaryFileExpected = new BinaryFileTestFormat();
+        $binaryFileExpected->readObject($buffer);
+
+        $this->assertEquals($binaryFileExpected, $binaryFileActual);
+    }
 
 }

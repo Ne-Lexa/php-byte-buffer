@@ -1,6 +1,7 @@
 <?php
 namespace Nelexa\Buffer;
 
+
 class FileBuffer extends ResourceBuffer
 {
     /**

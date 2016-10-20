@@ -138,8 +138,12 @@ class StringBuffer extends Buffer
      */
     public function replace($buffer, $length)
     {
+        $length = (int)$length;
         if ($this->isReadOnly()) {
             throw new BufferException("Read Only");
+        }
+        if ($length < 0) {
+            throw new BufferException("length < 0");
         }
         if ($length > $this->remaining()) {
             throw new BufferException("replace length > remaining");
@@ -179,6 +183,24 @@ class StringBuffer extends Buffer
     public final function truncate()
     {
         $this->setString("");
+    }
+
+    /**
+     * Close buffer. If this buffer resource that closes the stream.
+     */
+    public function close()
+    {
+        if ($this->string !== null) {
+            $this->string = null;
+        }
+    }
+
+    /**
+     * Destruct object, close file description.
+     */
+    function __destruct()
+    {
+        $this->close();
     }
 
     /**
