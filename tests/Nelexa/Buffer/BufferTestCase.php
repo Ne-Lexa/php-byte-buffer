@@ -5,6 +5,12 @@ namespace Nelexa\Buffer;
 use Nelexa\Buffer\BinaryFormat\BinaryFileItem;
 use Nelexa\Buffer\BinaryFormat\BinaryFileTestFormat;
 
+/**
+ * Base class for tests all type buffers.
+ *
+ * Class BufferTestCase
+ * @package Nelexa\Buffer
+ */
 abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
 {
 
@@ -25,7 +31,6 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         parent::setUp();
-
         $this->buffer = $this->createBuffer();
         if (!($this->buffer instanceof Buffer)) {
             throw new \AssertionError('$buffer can\'t implements Buffer');
@@ -35,7 +40,6 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
     protected function tearDown()
     {
         parent::tearDown();
-
         $this->buffer->close();
     }
 
@@ -62,6 +66,22 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $this->buffer->truncate();
         $this->assertEquals($this->buffer->position(), 0);
         $this->assertEquals($this->buffer->size(), 0);
+    }
+
+    public function testFluent()
+    {
+        $this->buffer->insertByte(1)
+            ->insertBoolean(true)
+            ->insertShort(5551)
+            ->skip(-2)
+            ->insertUTF("Hello, World")
+            ->truncate()
+            ->insertString(str_rot13('Hello World'))
+            ->setPosition(7)
+            ->flip();
+        $this->assertEquals($this->buffer->size(), 7);
+        $this->assertEquals($this->buffer->position(), 0);
+        $this->assertEquals($this->buffer->toString(), str_rot13('Hello W'));
     }
 
     public function testInsertFunctional()
@@ -297,6 +317,18 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \Nelexa\Buffer\BufferException
+     * @expectedExceptionMessage put length > remaining
+     */
+    public function testPutException2()
+    {
+        $this->buffer
+            ->insertString('Test')
+            ->rewind()
+            ->putString('My Test');
+    }
+
+    /**
+     * @expectedException \Nelexa\Buffer\BufferException
      * @expectedExceptionMessage replace length > remaining
      */
     public function testReplaceException()
@@ -313,6 +345,141 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals($this->buffer->size(), 0);
         $this->buffer->remove(1);
+    }
+
+    /**
+     * @expectedException \Nelexa\Buffer\BufferException
+     * @expectedExceptionMessage Read Only
+     */
+    public function testReadOnly()
+    {
+        $this->assertEquals($this->buffer->isReadOnly(), false);
+        $this->buffer->setReadOnly(true);
+        $this->assertEquals($this->buffer->isReadOnly(), true);
+        $this->buffer->insertBoolean(true);
+    }
+
+    public function testOrder()
+    {
+        $this->assertEquals($this->buffer->order(), Buffer::BIG_ENDIAN);
+
+        $this->buffer->insertByte(50)
+            ->insertShort(5000)
+            ->insertInt(50000000)
+            ->insertLong(5000000000);
+
+        $this->buffer->setOrder(Buffer::LITTLE_ENDIAN)->rewind();
+        $this->assertEquals($this->buffer->order(), Buffer::LITTLE_ENDIAN);
+
+        $this->assertEquals($this->buffer->getByte(), 50);
+        $this->assertEquals($this->buffer->getShort(), -30701);
+        $this->assertEquals($this->buffer->getInt(), -2131691006);
+        $this->assertEquals($this->buffer->getLong(), 68122622327521280);
+
+        $this->buffer->setOrder(Buffer::BIG_ENDIAN)->rewind();
+        $this->assertEquals($this->buffer->order(), Buffer::BIG_ENDIAN);
+
+        $this->assertEquals($this->buffer->getByte(), 50);
+        $this->assertEquals($this->buffer->getShort(), 5000);
+        $this->assertEquals($this->buffer->getInt(), 50000000);
+        $this->assertEquals($this->buffer->getLong(), 5000000000);
+    }
+
+    public function testPositions()
+    {
+        $this->buffer->insertString('Test value');
+        $this->assertEquals($this->buffer->size(), 10);
+        $this->assertEquals($this->buffer->position(), 10);
+
+        $this->buffer->setPosition(3);
+        $this->assertEquals($this->buffer->position(), 3);
+
+        $this->buffer->skip(2);
+        $this->assertEquals($this->buffer->position(), 5);
+
+        $this->buffer->skip(-4);
+        $this->assertEquals($this->buffer->position(), 1);
+
+        $this->assertEquals($this->buffer->remaining(), 9);
+        $this->assertEquals($this->buffer->hasRemaining(), true);
+
+        $this->buffer->setPosition($this->buffer->size());
+        $this->assertEquals($this->buffer->position(), 10);
+        $this->assertEquals($this->buffer->remaining(), 0);
+        $this->assertEquals($this->buffer->hasRemaining(), false);
+
+        $this->buffer->rewind();
+        $this->assertEquals($this->buffer->position(), 0);
+
+        $this->buffer->insertString(str_repeat('*', 100));
+        $this->assertEquals($this->buffer->position(), 100);
+        $this->assertEquals($this->buffer->size(), 110);
+
+        $this->buffer->setPosition(0);
+        $this->assertEquals($this->buffer->position(), 0);
+
+        $this->buffer->skipByte();
+        $this->assertEquals($this->buffer->position(), 1);
+
+        $this->buffer->skipShort();
+        $this->assertEquals($this->buffer->position(), 3);
+
+        $this->buffer->skipInt();
+        $this->assertEquals($this->buffer->position(), 7);
+
+        $this->buffer->skipLong();
+        $this->assertEquals($this->buffer->position(), 15);
+
+        $this->buffer->toString();
+        $this->assertEquals($this->buffer->position(), 15);
+
+        $this->buffer->flip();
+        $this->assertEquals($this->buffer->position(), 0);
+        $this->assertEquals($this->buffer->size(), 15);
+
+        $this->buffer->setPosition(5)->truncate();
+        $this->assertEquals($this->buffer->position(), 0);
+        $this->assertEquals($this->buffer->size(), 0);
+
+        $this->buffer->insertBoolean(true);
+        $this->assertEquals($this->buffer->position(), 1);
+        $this->assertEquals($this->buffer->size(), 1);
+        $this->buffer->truncate();
+
+        $this->buffer->insertByte(0);
+        $this->assertEquals($this->buffer->position(), 1);
+        $this->assertEquals($this->buffer->size(), 1);
+        $this->buffer->truncate();
+
+        $this->buffer->insertShort(0);
+        $this->assertEquals($this->buffer->position(), 2);
+        $this->assertEquals($this->buffer->size(), 2);
+        $this->buffer->truncate();
+
+        $this->buffer->insertInt(0);
+        $this->assertEquals($this->buffer->position(), 4);
+        $this->assertEquals($this->buffer->size(), 4);
+        $this->buffer->truncate();
+
+        $this->buffer->insertLong(0);
+        $this->assertEquals($this->buffer->position(), 8);
+        $this->assertEquals($this->buffer->size(), 8);
+        $this->buffer->truncate();
+
+        $this->buffer->insertArrayBytes([5, 5, 6, 5, 7, 8, 9]);
+        $this->assertEquals($this->buffer->position(), 7);
+        $this->assertEquals($this->buffer->size(), 7);
+        $this->buffer->truncate();
+
+        $this->buffer->insertUTF('Test');
+        $this->assertEquals($this->buffer->position(), 6);
+        $this->assertEquals($this->buffer->size(), 6);
+        $this->buffer->truncate();
+
+        $this->buffer->insertUTF16('Test');
+        $this->assertEquals($this->buffer->position(), 8);
+        $this->assertEquals($this->buffer->size(), 8);
+        $this->buffer->truncate();
     }
 
     public function testBinaryFile()

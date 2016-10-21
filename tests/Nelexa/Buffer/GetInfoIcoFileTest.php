@@ -3,7 +3,6 @@ namespace Nelexa\Buffer\Nelexa\Buffer;
 
 
 use Nelexa\Buffer\Buffer;
-use Nelexa\Buffer\BufferException;
 use Nelexa\Buffer\FileBuffer;
 
 class GetInfoIcoFileTest extends \PHPUnit_Framework_TestCase
@@ -46,17 +45,6 @@ class GetInfoIcoFileTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals($planes, 1);
             $this->assertEquals($bpp, 32);
         }
-
-        $buffer->setPosition(4);
-        try {
-            // read only test
-            $buffer->putShort(2);
-            $this->assertTrue(false);
-        }
-        catch (BufferException $bufferException){
-
-        }
-
         $buffer->close();
     }
 }

@@ -1,7 +1,14 @@
 <?php
 namespace Nelexa\Buffer;
 
-
+/**
+ * Read And Write Binary Data
+ *
+ * This is class defines methods for reading and writing values of all primitive types. Primitive values are translated to (or from) sequences of bytes according to the buffer's current byte order, which may be retrieved and modified via the order methods. The initial order of a byte buffer is always Buffer::BIG_ENDIAN.
+ *
+ * @author Ne-Lexa alexey@nelexa.ru
+ * @license MIT
+ */
 abstract class Buffer
 {
     const BIG_ENDIAN = "BIG_ENDIAN";
@@ -204,24 +211,14 @@ abstract class Buffer
     }
 
     /**
-     * Relative get method.
-     * Reads the string at this buffer's current position, and then increments the position.
+     * Skip number bytes.
      *
-     * @param $length
-     * @return string The strings at the buffer's current position
-     * @throws BufferException
-     */
-    abstract protected function get($length);
-
-    /**
-     * Skip count bytes
-     *
-     * @param int $count
+     * @param int $n The number of bytes to be skipped. The value may be negative.
      * @return Buffer
      */
-    public function skip($count)
+    public function skip($n)
     {
-        $this->setPosition($this->position() + $count);
+        $this->setPosition($this->position() + $n);
         return $this;
     }
 
@@ -270,7 +267,20 @@ abstract class Buffer
     }
 
     /**
-     * @return bool
+     * Relative get method.
+     * Reads the string at this buffer's current position, and then increments the position.
+     *
+     * @param int $length
+     * @return string The strings at the buffer's current position
+     * @throws BufferException
+     */
+    abstract protected function get($length);
+
+    /**
+     * Reads one input byte and returns true if that byte is nonzero,
+     * false if that byte is zero.
+     *
+     * @return bool the boolean value read.
      * @throws BufferException
      */
     public function getBoolean()
@@ -279,7 +289,11 @@ abstract class Buffer
     }
 
     /**
-     * @return int
+     * Reads and returns one input byte.
+     * The byte is treated as a signed value in
+     * the range -128 through 127, inclusive.
+     *
+     * @return int the 8-bit value read.
      * @throws BufferException
      */
     public function getByte()
@@ -288,7 +302,12 @@ abstract class Buffer
     }
 
     /**
-     * @return int
+     * Reads one input byte, zero-extends
+     * it to type int, and returns
+     * the result, which is therefore in the range
+     * 0 through 255.
+     *
+     * @return int the unsigned 8-bit value read.
      * @throws BufferException
      */
     public function getUnsignedByte()
@@ -297,7 +316,10 @@ abstract class Buffer
     }
 
     /**
-     * @return int
+     * Reads two input bytes and returns
+     * a short value in the range -32768 through 32767.
+     *
+     * @return int the 16-bit value read.
      * @throws BufferException
      */
     public function getShort()
@@ -306,7 +328,10 @@ abstract class Buffer
     }
 
     /**
-     * @return int
+     * Reads two input bytes and returns
+     * an int value in the range 0 through 65535.
+     *
+     * @return int the unsigned 16-bit value read.
      * @throws BufferException
      */
     public function getUnsignedShort()
@@ -315,7 +340,10 @@ abstract class Buffer
     }
 
     /**
-     * @return int
+     * Reads four input bytes and returns an int value
+     * in the range -2147483648 through 2147483647.
+     *
+     * @return int the int value read.
      * @throws BufferException
      */
     public function getInt()
@@ -324,7 +352,10 @@ abstract class Buffer
     }
 
     /**
-     * @return int
+     * Reads four input bytes and returns an long value
+     * in the range 0 through 4294967296.
+     *
+     * @return int the unsigned int value read.
      * @throws BufferException
      */
     public function getUnsignedInt()
@@ -333,7 +364,10 @@ abstract class Buffer
     }
 
     /**
-     * @return string|int
+     * Reads eight input bytes and returns a long value
+     * in the range -9223372036854775808 through 9223372036854775807.
+     *
+     * @return string|int the long value read.
      * @throws BufferException
      */
     public function getLong()
@@ -352,34 +386,49 @@ abstract class Buffer
     }
 
     /**
-     * @param $size int
+     * Reads $length input bytes and returns a string value.
+     *
+     * @param $length int
      * @return string
      * @throws BufferException
      */
-    public function getString($size)
+    public function getString($length)
     {
-        if ($size > 0) {
-            return $this->get($size);
+        if ($length > 0) {
+            return $this->get($length);
         }
         return "";
     }
 
     /**
-     * @param $size int
-     * @return string
+     * Reads $length bytes from an input stream.
+     *
+     * @param $length int
+     * @return array
      * @throws BufferException
      */
-    public function getArrayBytes($size)
+    public function getArrayBytes($length)
     {
-        if ($size > 0) {
+        if ($length > 0) {
             return array_values(
-                unpack('c*', $this->get($size))
+                unpack('c*', $this->get($length))
             );
         }
         return array();
     }
 
     /**
+     * Reads in a string that has been encoded using
+     * a modified UTF-8 format.
+     * 
+     * First, two bytes are read and used to
+     * construct an unsigned 16-bit integer in
+     * exactly the manner of the Buffer::readUnsignedShort()
+     * method. This integer value is called the UTF length
+     * and specifies the number of additional bytes to be read.
+     *
+     * Analog java @see java.io.DataOutputStream#readUTF()
+     *
      * @return string
      * @throws BufferException
      */
@@ -394,6 +443,8 @@ abstract class Buffer
     }
 
     /**
+     * Reads $length * 2 input bytes and returns a string value.
+     *
      * @param $length int
      * @return string
      * @throws BufferException
@@ -405,7 +456,6 @@ abstract class Buffer
         }
         return "";
     }
-
 
     /**
      * @param bool $bool
@@ -505,7 +555,15 @@ abstract class Buffer
     }
 
     /**
-     * Analog Java DataOutputStream.writeUTF
+     * Writes a string to the underlying output stream using
+     * modified UTF-8 encoding in a machine-independent manner.
+     *
+     * First, two bytes are written to the output stream as if by the
+     * Buffer::writeShort() method giving the number of bytes to
+     * follow. This value is the number of bytes actually written out,
+     * not the length of the string.
+     *
+     * Analog java @see java.io.DataOutputStream#writeUTF()
      *
      * @param string $str
      * @return string
@@ -514,12 +572,15 @@ abstract class Buffer
     protected function writeUTF($str)
     {
         if ($str === null) {
-            throw new BufferException("null str");
+            throw new BufferException('$str is null');
         }
         $bytes = unpack('c*', $str);
         $length = sizeof($bytes);
+        if ($length > 65535) {
+            throw new BufferException('Encoded string too long: ' . $length . ' bytes');
+        }
         array_unshift($bytes, 'c*');
-        return $this->writeShort($length) . call_user_func_array("pack", $bytes);
+        return $this->writeShort($length) . call_user_func_array('pack', $bytes);
     }
 
     /**
@@ -530,7 +591,7 @@ abstract class Buffer
     protected function writeUTF16($string)
     {
         if ($string === null) {
-            throw new BufferException("null UTF16");
+            throw new BufferException('$string is null');
         }
         $args = array_map('ord', str_split($string));
         array_unshift($args, 'S*');
@@ -538,6 +599,8 @@ abstract class Buffer
     }
 
     /**
+     * Insert Buffer or string.
+     *
      * @param Buffer|string $buffer
      * @return Buffer
      * @throws BufferException
@@ -629,27 +692,30 @@ abstract class Buffer
     }
 
     /**
-     * Insert UTF string (Format - java DataOutputStream.writeUTF)
+     * Writes a string to the underlying output stream using
+     * modified UTF-8 encoding in a machine-independent manner.
      *
-     * @param string $str
+     * @see Buffer::writeUTF()
+     *
+     * @param string $string
      * @return Buffer
      * @throws BufferException
      */
-    public function insertUTF($str)
+    public function insertUTF($string)
     {
-        return $this->insert($this->writeUTF($str));
+        return $this->insert($this->writeUTF($string));
     }
 
     /**
      * Insert UTF16 string
      *
-     * @param string $str
+     * @param string $string
      * @return Buffer
      * @throws BufferException
      */
-    public function insertUTF16($str)
+    public function insertUTF16($string)
     {
-        return $this->insert($this->writeUTF16($str));
+        return $this->insert($this->writeUTF16($string));
     }
 
     /**
@@ -773,6 +839,8 @@ abstract class Buffer
     }
 
     /**
+     * Replace $length bytes in a string or Buffer.
+     *
      * @param Buffer|string $buffer
      * @param int $length remove length bytes
      * @return Buffer
@@ -781,7 +849,7 @@ abstract class Buffer
     abstract public function replace($buffer, $length);
 
     /**
-     * Replace boolean value
+     * Replace by boolean value
      *
      * @param bool $bool
      * @param int $length
@@ -794,7 +862,7 @@ abstract class Buffer
     }
 
     /**
-     * Replace byte (-128 >= byte <= 127)
+     * Replace by byte (-128 >= byte <= 127)
      *
      * @param int|string $byte
      * @param int $length
@@ -898,6 +966,8 @@ abstract class Buffer
     }
 
     /**
+     * Remove a certain number of bytes.
+     *
      * @param int $length
      * @return Buffer
      * @throws BufferException

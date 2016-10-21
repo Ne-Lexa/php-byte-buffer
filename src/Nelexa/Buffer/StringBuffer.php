@@ -3,8 +3,12 @@ namespace Nelexa\Buffer;
 
 
 /**
- * StringBuffer class for binary safe operation with strings
- * (Like Java ByteBuffer Or Java DataInputStream and DataOutputStream).
+ * Read And Write Binary Data From String.
+ *
+ * This is class defines methods for reading and writing values of all primitive types. Primitive values are translated to (or from) sequences of bytes according to the buffer's current byte order, which may be retrieved and modified via the order methods. The initial order of a byte buffer is always Buffer::BIG_ENDIAN.
+ *
+ * @author Ne-Lexa alexey@nelexa.ru
+ * @license MIT
  */
 class StringBuffer extends Buffer
 {
