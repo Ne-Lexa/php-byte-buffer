@@ -1,8 +1,14 @@
 <?php
 namespace Nelexa\Buffer;
 
+
 /**
- * StringBuffer class for binary safe operation with strings (Like Java ByteBuffer Or Java DataInputStream and DataOutputStream).
+ * Read And Write Binary Data From String.
+ *
+ * This is class defines methods for reading and writing values of all primitive types. Primitive values are translated to (or from) sequences of bytes according to the buffer's current byte order, which may be retrieved and modified via the order methods. The initial order of a byte buffer is always Buffer::BIG_ENDIAN.
+ *
+ * @author Ne-Lexa alexey@nelexa.ru
+ * @license MIT
  */
 class StringBuffer extends Buffer
 {
@@ -50,11 +56,14 @@ class StringBuffer extends Buffer
      * After a sequence of channel-read or put operations, invoke
      * this method to prepare for a sequence of channel-write or relative
      * get operations.
+     *
+     * @return Buffer
      */
     public final function flip()
     {
         $this->setString(substr($this->string, 0, $this->position()));
         $this->setPosition(0);
+        return $this;
     }
 
 
@@ -79,6 +88,7 @@ class StringBuffer extends Buffer
 
     /**
      * @param Buffer|string $buffer
+     * @return Buffer
      * @throws BufferException
      */
     public function insert($buffer)
@@ -96,6 +106,7 @@ class StringBuffer extends Buffer
         $this->string = substr_replace($this->string, $buffer, $this->position(), 0);
         $this->newLimit($this->size() + $length);
         $this->skip($length);
+        return $this;
     }
 
     /**
@@ -105,6 +116,7 @@ class StringBuffer extends Buffer
      * position, and then increments the position.
      *
      * @param Buffer|string $buffer
+     * @return Buffer
      * @throws BufferException
      */
     public function put($buffer)
@@ -115,7 +127,6 @@ class StringBuffer extends Buffer
         if ($buffer === null) {
             throw new BufferException("null buffer");
         }
-        $length = null;
         if ($buffer instanceof Buffer) {
             $length = $buffer->size();
             $buffer = $buffer->toString();
@@ -127,18 +138,24 @@ class StringBuffer extends Buffer
         }
         $this->string = substr_replace($this->string, $buffer, $this->position(), $length);
         $this->skip($length);
+        return $this;
     }
 
 
     /**
      * @param Buffer|string $buffer
      * @param int $length remove length bytes
+     * @return Buffer
      * @throws BufferException
      */
     public function replace($buffer, $length)
     {
+        $length = (int)$length;
         if ($this->isReadOnly()) {
             throw new BufferException("Read Only");
+        }
+        if ($length < 0) {
+            throw new BufferException("length < 0");
         }
         if ($length > $this->remaining()) {
             throw new BufferException("replace length > remaining");
@@ -153,11 +170,13 @@ class StringBuffer extends Buffer
         $this->string = substr_replace($this->string, $buffer, $this->position(), $length);
         $this->newLimit($this->size() + $bufferLength - $length);
         $this->skip($bufferLength);
+        return $this;
     }
 
 
     /**
      * @param int $length
+     * @return Buffer
      * @throws BufferException
      */
     public final function remove($length)
@@ -165,31 +184,44 @@ class StringBuffer extends Buffer
         if ($this->isReadOnly()) {
             throw new BufferException("Read Only");
         }
+        if ($length < 0) {
+            throw new BufferException("length < 0");
+        }
         if ($length > $this->remaining()) {
             throw new BufferException("remove length > remaining");
         }
         $this->string = substr_replace($this->string, '', $this->position(), $length);
         $this->newLimit($this->size() - $length);
+        return $this;
     }
 
     /**
      * Truncate buffer
+     *
+     * @return Buffer
      */
     public final function truncate()
     {
         $this->setString("");
+        return $this;
     }
 
     /**
-     * @return string
+     * Close buffer. If this buffer resource that closes the stream.
      */
-    function __toString()
+    public function close()
     {
-        return __CLASS__ . '{' .
-        'position=' . $this->position() .
-        ', limit=' . $this->size() .
-        ', order=' . $this->order() .
-        ', readOnly=' . ($this->isReadOnly() ? 'true' : 'false') .
-        '}';
+        if ($this->string !== null) {
+            $this->string = null;
+        }
     }
+
+    /**
+     * Destruct object, close file description.
+     */
+    function __destruct()
+    {
+        $this->close();
+    }
+
 }

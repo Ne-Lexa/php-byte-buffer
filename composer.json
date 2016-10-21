@@ -1,7 +1,22 @@
 {
   "name": "nelexa/buffer",
-  "description": "Buffer read and write binary files",
-  "minimum-stability": "dev",
+  "description": "Reading And Writing Binary Data (incl. primitive types, ex. byte, ubyte, short, ushort, int, uint, long). The classes also help with porting the I/O operations of the JAVA code.",
+  "type": "library",
+  "keywords": [
+    "binary",
+    "primitive",
+    "byte",
+    "ubyte",
+    "short",
+    "ushort",
+    "int",
+    "uint",
+    "long",
+    "io",
+    "java",
+    "pack",
+    "unpack"
+  ],
   "license": "MIT",
   "authors": [
     {
@@ -10,14 +25,19 @@
     }
   ],
   "require": {
-    "php": ">=5.3"
+    "php-64bit": ">=5.4"
   },
   "require-dev": {
-    "phpunit/phpunit": "^5.5"
+    "phpunit/phpunit": "^4.8"
   },
   "autoload": {
     "psr-4": {
-      "Nelexa\\Buffer\\": "src"
+      "": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "": "tests/"
     }
   }
 }
