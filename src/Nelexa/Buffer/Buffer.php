@@ -25,6 +25,8 @@ abstract class Buffer
     private $isReadOnly = false;
 
     /**
+     * Set buffer position.
+     *
      * @param int $position
      * @return Buffer
      * @throws BufferException
@@ -40,6 +42,8 @@ abstract class Buffer
     }
 
     /**
+     * Get buffer position
+     *
      * @return int
      */
     public final function position()
@@ -69,12 +73,14 @@ abstract class Buffer
     }
 
     /**
-     * Flips this buffer.  The limit is set to the current position and then
+     * Flips this buffer. The limit is set to the current position and then
      * the position is set to zero.
      *
      * After a sequence of channel-read or put operations, invoke
      * this method to prepare for a sequence of channel-write or relative
      * get operations.
+     *
+     * @return Buffer
      */
     abstract public function flip();
 
@@ -108,7 +114,7 @@ abstract class Buffer
      * @return Buffer
      * @throws BufferException
      */
-    public final function newLimit($newLimit)
+    protected function newLimit($newLimit)
     {
         if ($newLimit < 0) {
             throw new BufferException("New Limit < 0");
@@ -133,14 +139,15 @@ abstract class Buffer
     /**
      * Modifies this buffer's byte order.
      *
-     * @param string $order The new byte order, either Buffer::BIG_ENDIAN or Buffer::LITTLE_ENDIAN
      * @see Buffer::BIG_ENDIAN
      * @see Buffer::LITTLE_ENDIAN
+     *
+     * @param string $order The new byte order, either Buffer::BIG_ENDIAN or Buffer::LITTLE_ENDIAN
      * @return Buffer
      */
     public final function setOrder($order)
     {
-        $this->order = $order == self::LITTLE_ENDIAN ? $order : self::BIG_ENDIAN;
+        $this->order = $order === self::LITTLE_ENDIAN ? $order : self::BIG_ENDIAN;
         return $this;
     }
 
@@ -148,12 +155,13 @@ abstract class Buffer
      * Retrieves this buffer's byte order.
      *
      * The byte order is used when reading or writing multibyte values, and
-     * when creating buffers that are views of this byte buffer.  The order of
+     * when creating buffers that are views of this byte buffer. The order of
      * a newly-created byte buffer is always Buffer::BIG_ENDIAN
      *
-     * @return string This buffer's byte order
      * @see Buffer::BIG_ENDIAN
      * @see Buffer::LITTLE_ENDIAN
+     *
+     * @return string This buffer's byte order
      */
     public final function order()
     {
@@ -163,9 +171,10 @@ abstract class Buffer
     /**
      * Buffer's byte order is Buffer::LITTLE_ENDIAN
      *
-     * @return bool
      * @see Buffer::BIG_ENDIAN
      * @see Buffer::LITTLE_ENDIAN
+     *
+     * @return bool
      */
     protected final function isOrderLE()
     {
@@ -173,6 +182,8 @@ abstract class Buffer
     }
 
     /**
+     * Set read only buffer.
+     *
      * @param boolean $isReadOnly
      * @return Buffer
      */
@@ -183,6 +194,8 @@ abstract class Buffer
     }
 
     /**
+     * Is read only buffer.
+     *
      * @return boolean
      */
     public final function isReadOnly()
@@ -201,7 +214,7 @@ abstract class Buffer
     abstract protected function get($length);
 
     /**
-     * skip count bytes
+     * Skip count bytes
      *
      * @param int $count
      * @return Buffer
@@ -213,7 +226,7 @@ abstract class Buffer
     }
 
     /**
-     * skip 1 byte
+     * Skip 1 byte
      *
      * @return Buffer
      */
@@ -224,7 +237,7 @@ abstract class Buffer
     }
 
     /**
-     * skip short (2 bytes)
+     * Skip short (2 bytes)
      *
      * @return Buffer
      */
@@ -235,7 +248,7 @@ abstract class Buffer
     }
 
     /**
-     * skip int (4 bytes)
+     * Skip int (4 bytes)
      *
      * @return Buffer
      */
@@ -246,7 +259,7 @@ abstract class Buffer
     }
 
     /**
-     * skip long (8 bytes)
+     * Skip long (8 bytes)
      *
      * @return Buffer
      */
@@ -907,5 +920,18 @@ abstract class Buffer
      * @return string
      */
     abstract public function toString();
+
+    /**
+     * @return string
+     */
+    function __toString()
+    {
+        return get_called_class() . '{' .
+        'position=' . $this->position() .
+        ', limit=' . $this->size() .
+        ', order=' . $this->order() .
+        ', readOnly=' . ($this->isReadOnly() ? 'true' : 'false') .
+        '}';
+    }
 
 }

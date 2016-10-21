@@ -277,6 +277,14 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $this->assertEquals('123456789', $this->buffer->toString());
     }
 
+    public function testRemoveFunctional()
+    {
+        $this->buffer->insertString('123456789');
+        $this->buffer->setPosition(3);
+        $this->buffer->remove(3);
+        $this->assertEquals('123789', $this->buffer->toString());
+    }
+
     /**
      * @expectedException \Nelexa\Buffer\BufferException
      * @expectedExceptionMessage put length > remaining
@@ -295,6 +303,16 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
     {
         $this->assertEquals($this->buffer->size(), 0);
         $this->buffer->replaceString('Test', 5);
+    }
+
+    /**
+     * @expectedException \Nelexa\Buffer\BufferException
+     * @expectedExceptionMessage remove length > remaining
+     */
+    public function testRemoveException()
+    {
+        $this->assertEquals($this->buffer->size(), 0);
+        $this->buffer->remove(1);
     }
 
     public function testBinaryFile()

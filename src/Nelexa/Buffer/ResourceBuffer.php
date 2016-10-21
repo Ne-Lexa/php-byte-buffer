@@ -11,29 +11,26 @@ class ResourceBuffer extends Buffer
 
     /**
      * @param resource $resource
-     * @param bool $readOnly
      * @throws BufferException
      */
-    function __construct($resource, $readOnly = false)
+    function __construct($resource)
     {
-        $this->setResource($resource, $readOnly);
+        $this->setResource($resource);
     }
 
     /**
      * @param resource $resource
-     * @param bool $readOnly
      * @throws BufferException
      */
-    protected function setResource($resource, $readOnly = true)
+    protected function setResource($resource)
     {
-        parent::setReadOnly($readOnly);
         if ($resource === null) {
             throw new BufferException("Resource null");
         }
         if (!is_resource($resource)) {
             throw new BufferException("invalid type \$resource - is not resource");
         }
-        if ($readOnly && !stream_is_local($resource)) {
+        if (!stream_is_local($resource)) {
             throw new BufferException("invalid argument \$resource - read only resource is not local");
         }
         $meta = stream_get_meta_data($resource);
@@ -61,17 +58,7 @@ class ResourceBuffer extends Buffer
     }
 
     /**
-     * @param bool $isReadOnly
-     * @return Buffer|void
-     * @throws BufferException
-     */
-    public function setReadOnly($isReadOnly)
-    {
-        throw new BufferException("Not Support Set Read Only in runtime. Use method setResource(\$resource, \$readOnly)");
-    }
-
-    /**
-     * Flips this buffer.  The limit is set to the current position and then
+     * Flips this buffer. The limit is set to the current position and then
      * the position is set to zero.
      *
      * After a sequence of channel-read or put operations, invoke
@@ -92,7 +79,7 @@ class ResourceBuffer extends Buffer
      * Relative get method.
      * Reads the string at this buffer's current position, and then increments the position.
      *
-     * @param $length
+     * @param int $length
      * @return string The strings at the buffer's current position
      * @throws BufferException
      */
@@ -110,8 +97,8 @@ class ResourceBuffer extends Buffer
     }
 
     /**
-     * @param int|string $position
-     * @return Buffer|void
+     * @param int $position
+     * @return Buffer
      * @throws BufferException
      */
     public function setPosition($position)
@@ -248,6 +235,9 @@ class ResourceBuffer extends Buffer
         if ($this->isReadOnly()) {
             throw new BufferException("Read Only");
         }
+        if ($length < 0) {
+            throw new BufferException("length < 0");
+        }
         if ($length > $this->remaining()) {
             throw new BufferException("remove length > remaining");
         }
@@ -302,5 +292,6 @@ class ResourceBuffer extends Buffer
             $this->resource = null;
         }
     }
+
 
 }

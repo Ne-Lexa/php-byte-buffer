@@ -15,8 +15,8 @@ class GetInfoIcoFileTest extends \PHPUnit_Framework_TestCase
     {
         $binaryFile = __DIR__ . '/test.ico';
 
-        $readOnly = true;
-        $buffer = new FileBuffer($binaryFile, $readOnly);
+        $buffer = new FileBuffer($binaryFile);
+        $buffer->setReadOnly(true);
         $buffer->setOrder(Buffer::LITTLE_ENDIAN);
 
         // ico header

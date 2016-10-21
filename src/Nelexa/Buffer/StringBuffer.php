@@ -1,6 +1,7 @@
 <?php
 namespace Nelexa\Buffer;
 
+
 /**
  * StringBuffer class for binary safe operation with strings
  * (Like Java ByteBuffer Or Java DataInputStream and DataOutputStream).
@@ -51,11 +52,14 @@ class StringBuffer extends Buffer
      * After a sequence of channel-read or put operations, invoke
      * this method to prepare for a sequence of channel-write or relative
      * get operations.
+     *
+     * @return Buffer
      */
     public final function flip()
     {
         $this->setString(substr($this->string, 0, $this->position()));
         $this->setPosition(0);
+        return $this;
     }
 
 
@@ -80,6 +84,7 @@ class StringBuffer extends Buffer
 
     /**
      * @param Buffer|string $buffer
+     * @return Buffer
      * @throws BufferException
      */
     public function insert($buffer)
@@ -97,6 +102,7 @@ class StringBuffer extends Buffer
         $this->string = substr_replace($this->string, $buffer, $this->position(), 0);
         $this->newLimit($this->size() + $length);
         $this->skip($length);
+        return $this;
     }
 
     /**
@@ -106,6 +112,7 @@ class StringBuffer extends Buffer
      * position, and then increments the position.
      *
      * @param Buffer|string $buffer
+     * @return Buffer
      * @throws BufferException
      */
     public function put($buffer)
@@ -116,7 +123,6 @@ class StringBuffer extends Buffer
         if ($buffer === null) {
             throw new BufferException("null buffer");
         }
-        $length = null;
         if ($buffer instanceof Buffer) {
             $length = $buffer->size();
             $buffer = $buffer->toString();
@@ -128,12 +134,14 @@ class StringBuffer extends Buffer
         }
         $this->string = substr_replace($this->string, $buffer, $this->position(), $length);
         $this->skip($length);
+        return $this;
     }
 
 
     /**
      * @param Buffer|string $buffer
      * @param int $length remove length bytes
+     * @return Buffer
      * @throws BufferException
      */
     public function replace($buffer, $length)
@@ -158,11 +166,13 @@ class StringBuffer extends Buffer
         $this->string = substr_replace($this->string, $buffer, $this->position(), $length);
         $this->newLimit($this->size() + $bufferLength - $length);
         $this->skip($bufferLength);
+        return $this;
     }
 
 
     /**
      * @param int $length
+     * @return Buffer
      * @throws BufferException
      */
     public final function remove($length)
@@ -170,19 +180,26 @@ class StringBuffer extends Buffer
         if ($this->isReadOnly()) {
             throw new BufferException("Read Only");
         }
+        if ($length < 0) {
+            throw new BufferException("length < 0");
+        }
         if ($length > $this->remaining()) {
             throw new BufferException("remove length > remaining");
         }
         $this->string = substr_replace($this->string, '', $this->position(), $length);
         $this->newLimit($this->size() - $length);
+        return $this;
     }
 
     /**
      * Truncate buffer
+     *
+     * @return Buffer
      */
     public final function truncate()
     {
         $this->setString("");
+        return $this;
     }
 
     /**
@@ -203,16 +220,4 @@ class StringBuffer extends Buffer
         $this->close();
     }
 
-    /**
-     * @return string
-     */
-    function __toString()
-    {
-        return __CLASS__ . '{' .
-        'position=' . $this->position() .
-        ', limit=' . $this->size() .
-        ', order=' . $this->order() .
-        ', readOnly=' . ($this->isReadOnly() ? 'true' : 'false') .
-        '}';
-    }
 }
