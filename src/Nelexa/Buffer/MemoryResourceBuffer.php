@@ -1,6 +1,7 @@
 <?php
 namespace Nelexa\Buffer;
 
+
 class MemoryResourceBuffer extends ResourceBuffer
 {
     /**
@@ -11,14 +12,13 @@ class MemoryResourceBuffer extends ResourceBuffer
      */
     function __construct($bytes = "")
     {
-        if ($bytes === null) {
-            throw new BufferException("null Bytes");
+        if (($fp = fopen("php://memory", "w+b")) === false) {
+            throw new BufferException("Can not open memory");
         }
-        if (($fp = fopen("php://memory", "wb+")) === false) {
-            throw new BufferException("can not open memory");
+        if(!empty($bytes)) {
+            fwrite($fp, (string)$bytes);
+            rewind($fp);
         }
-        fwrite($fp, $bytes);
-        rewind($fp);
-        parent::__construct($fp, false);
+        parent::__construct($fp);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace Nelexa\Buffer;
 
+
 class ResourceBuffer extends Buffer
 {
     /**
@@ -10,29 +11,26 @@ class ResourceBuffer extends Buffer
 
     /**
      * @param resource $resource
-     * @param bool $readOnly
      * @throws BufferException
      */
-    function __construct($resource, $readOnly = false)
+    function __construct($resource)
     {
-        $this->setResource($resource, $readOnly);
+        $this->setResource($resource);
     }
 
     /**
      * @param resource $resource
-     * @param bool $readOnly
      * @throws BufferException
      */
-    protected function setResource($resource, $readOnly = true)
+    protected function setResource($resource)
     {
-        parent::setReadOnly($readOnly);
         if ($resource === null) {
             throw new BufferException("Resource null");
         }
         if (!is_resource($resource)) {
             throw new BufferException("invalid type \$resource - is not resource");
         }
-        if ($readOnly && !stream_is_local($resource)) {
+        if (!stream_is_local($resource)) {
             throw new BufferException("invalid argument \$resource - read only resource is not local");
         }
         $meta = stream_get_meta_data($resource);
@@ -60,34 +58,28 @@ class ResourceBuffer extends Buffer
     }
 
     /**
-     * @param bool $isReadOnly
-     * @throws BufferException
-     */
-    public function setReadOnly($isReadOnly)
-    {
-        throw new BufferException("Not Support Set Read Only in runtime. Use method setResource(\$resource, \$readOnly)");
-    }
-
-    /**
-     * Flips this buffer.  The limit is set to the current position and then
+     * Flips this buffer. The limit is set to the current position and then
      * the position is set to zero.
      *
      * After a sequence of channel-read or put operations, invoke
      * this method to prepare for a sequence of channel-write or relative
      * get operations.
+     *
+     * @return Buffer
      */
     public function flip()
     {
         $this->newLimit($this->position());
         ftruncate($this->resource, $this->size());
         $this->setPosition(0);
+        return $this;
     }
 
     /**
      * Relative get method.
      * Reads the string at this buffer's current position, and then increments the position.
      *
-     * @param $length
+     * @param int $length
      * @return string The strings at the buffer's current position
      * @throws BufferException
      */
@@ -105,7 +97,8 @@ class ResourceBuffer extends Buffer
     }
 
     /**
-     * @param int|string $position
+     * @param int $position
+     * @return Buffer
      * @throws BufferException
      */
     public function setPosition($position)
@@ -114,7 +107,7 @@ class ResourceBuffer extends Buffer
             throw new BufferException("position " . $position . " is not numeric");
         }
         if (fseek($this->resource, $position, SEEK_SET) === 0) {
-            parent::setPosition($position);
+            return parent::setPosition($position);
         } else {
             throw new BufferException("set position " . $position . " failure");
         }
@@ -123,6 +116,7 @@ class ResourceBuffer extends Buffer
 
     /**
      * @param Buffer|string $buffer
+     * @return Buffer
      * @throws BufferException
      */
     public function insert($buffer)
@@ -150,6 +144,7 @@ class ResourceBuffer extends Buffer
         }
         $this->newLimit($this->size() + $lengthBuffer);
         $this->skip($lengthBuffer);
+        return $this;
     }
 
     /**
@@ -159,6 +154,7 @@ class ResourceBuffer extends Buffer
      * position, and then increments the position.
      *
      * @param Buffer|string $buffer
+     * @return Buffer
      * @throws BufferException
      */
     public function put($buffer)
@@ -184,17 +180,23 @@ class ResourceBuffer extends Buffer
             throw new BufferException("Not write all bytes. Length: " . $length . ', write length: ' . $lengthWrite);
         }
         $this->skip($length);
+        return $this;
     }
 
     /**
      * @param Buffer|string $buffer
      * @param int $length remove length bytes
+     * @return Buffer
      * @throws BufferException
      */
     public function replace($buffer, $length)
     {
+        $length = (int)$length;
         if ($this->isReadOnly()) {
             throw new BufferException("Read Only");
+        }
+        if ($length < 0) {
+            throw new BufferException("length < 0");
         }
         if ($length > $this->remaining()) {
             throw new BufferException("replace length > remaining");
@@ -220,16 +222,21 @@ class ResourceBuffer extends Buffer
         }
         $this->newLimit($this->size() + $lengthBuffer - $length);
         $this->skip($lengthBuffer);
+        return $this;
     }
 
     /**
      * @param int $length
+     * @return Buffer
      * @throws BufferException
      */
     public function remove($length)
     {
         if ($this->isReadOnly()) {
             throw new BufferException("Read Only");
+        }
+        if ($length < 0) {
+            throw new BufferException("length < 0");
         }
         if ($length > $this->remaining()) {
             throw new BufferException("remove length > remaining");
@@ -247,11 +254,13 @@ class ResourceBuffer extends Buffer
         }
         $this->newLimit($this->size() - $length);
         $this->setPosition($position);
+        return $this;
     }
 
     /**
      * Truncate file
      *
+     * @return Buffer
      * @throws BufferException
      */
     public final function truncate()
@@ -262,21 +271,27 @@ class ResourceBuffer extends Buffer
         ftruncate($this->resource, 0);
         $this->rewind();
         $this->newLimit(0);
+        return $this;
     }
 
-//    /**
-//     * Destruct object, close file description.
-//     */
-//    function __destruct()
-//    {
-//        $this->close();
-//    }
+    /**
+     * Destruct object, close file description.
+     */
+    function __destruct()
+    {
+        $this->close();
+    }
 
+    /**
+     * Close buffer. If this buffer resource that closes the stream.
+     */
     public function close()
     {
         if ($this->resource !== null && is_resource($this->resource)) {
             fclose($this->resource);
+            $this->resource = null;
         }
     }
+
 
 }
