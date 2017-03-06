@@ -32,12 +32,12 @@
   },
   "autoload": {
     "psr-4": {
-      "": "src/"
+      "Nelexa\\Buffer\\": "src/Nelexa/Buffer"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "": "tests/"
+      "Nelexa\\Buffer\\": "tests/Nelexa/Buffer"
     }
   }
 }

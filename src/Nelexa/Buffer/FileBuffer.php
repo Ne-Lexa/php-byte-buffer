@@ -46,7 +46,7 @@ class FileBuffer extends ResourceBuffer
      */
     public function setReadOnly($isReadOnly)
     {
-        if(!$this->writable && !$isReadOnly){
+        if (!$this->writable && !$isReadOnly) {
             throw new BufferException("You can not set the recording flag. The directory containing the file is not available for recording.");
         }
         return parent::setReadOnly($isReadOnly);
