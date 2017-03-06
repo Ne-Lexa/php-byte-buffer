@@ -22,7 +22,7 @@ class MemoryResourceBuffer extends ResourceBuffer
         if (($fp = fopen("php://memory", "w+b")) === false) {
             throw new BufferException("Can not open memory");
         }
-        if(!empty($bytes)) {
+        if (!empty($bytes)) {
             fwrite($fp, (string)$bytes);
             rewind($fp);
         }

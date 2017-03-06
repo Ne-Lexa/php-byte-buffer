@@ -19,30 +19,6 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
      */
     protected $buffer;
 
-    /**
-     * @return Buffer
-     */
-    abstract protected function createBuffer();
-
-    /**
-     * Set up
-     * @throws \AssertionError
-     */
-    protected function setUp()
-    {
-        parent::setUp();
-        $this->buffer = $this->createBuffer();
-        if (!($this->buffer instanceof Buffer)) {
-            throw new \AssertionError('$buffer can\'t implements Buffer');
-        }
-    }
-
-    protected function tearDown()
-    {
-        parent::tearDown();
-        $this->buffer->close();
-    }
-
     public function testBaseFunctional()
     {
         $this->buffer->insertString("Telephone");
@@ -500,6 +476,30 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $binaryFileExpected->readObject($buffer);
 
         $this->assertEquals($binaryFileExpected, $binaryFileActual);
+    }
+
+    /**
+     * Set up
+     * @throws \AssertionError
+     */
+    protected function setUp()
+    {
+        parent::setUp();
+        $this->buffer = $this->createBuffer();
+        if (!($this->buffer instanceof Buffer)) {
+            throw new \AssertionError('$buffer can\'t implements Buffer');
+        }
+    }
+
+    /**
+     * @return Buffer
+     */
+    abstract protected function createBuffer();
+
+    protected function tearDown()
+    {
+        parent::tearDown();
+        $this->buffer->close();
     }
 
 }

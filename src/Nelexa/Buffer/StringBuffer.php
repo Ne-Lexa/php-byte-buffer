@@ -61,30 +61,10 @@ class StringBuffer extends Buffer
      */
     public final function flip()
     {
-        $this->setString(substr($this->string, 0, $this->position()));
+        $this->setString(substr($this->string, 0, $this->position));
         $this->setPosition(0);
         return $this;
     }
-
-
-    /**
-     * Relative get method.
-     * Reads the string at this buffer's current position, and then increments the position.
-     *
-     * @param $length
-     * @return string The strings at the buffer's current position
-     * @throws BufferException
-     */
-    protected function get($length)
-    {
-        if ($length > $this->remaining()) {
-            throw new BufferException("get length > remaining");
-        }
-        $str = substr($this->string, $this->position(), $length);
-        $this->skip($length);
-        return $str;
-    }
-
 
     /**
      * @param Buffer|string $buffer
@@ -103,7 +83,7 @@ class StringBuffer extends Buffer
             $buffer = $buffer->toString();
         }
         $length = strlen($buffer);
-        $this->string = substr_replace($this->string, $buffer, $this->position(), 0);
+        $this->string = substr_replace($this->string, $buffer, $this->position, 0);
         $this->newLimit($this->size() + $length);
         $this->skip($length);
         return $this;
@@ -136,11 +116,10 @@ class StringBuffer extends Buffer
         if ($length > $this->remaining()) {
             throw new BufferException("put length > remaining");
         }
-        $this->string = substr_replace($this->string, $buffer, $this->position(), $length);
+        $this->string = substr_replace($this->string, $buffer, $this->position, $length);
         $this->skip($length);
         return $this;
     }
-
 
     /**
      * @param Buffer|string $buffer
@@ -167,12 +146,11 @@ class StringBuffer extends Buffer
             $buffer = $buffer->toString();
         }
         $bufferLength = strlen($buffer);
-        $this->string = substr_replace($this->string, $buffer, $this->position(), $length);
+        $this->string = substr_replace($this->string, $buffer, $this->position, $length);
         $this->newLimit($this->size() + $bufferLength - $length);
         $this->skip($bufferLength);
         return $this;
     }
-
 
     /**
      * @param int $length
@@ -190,7 +168,7 @@ class StringBuffer extends Buffer
         if ($length > $this->remaining()) {
             throw new BufferException("remove length > remaining");
         }
-        $this->string = substr_replace($this->string, '', $this->position(), $length);
+        $this->string = substr_replace($this->string, '', $this->position, $length);
         $this->newLimit($this->size() - $length);
         return $this;
     }
@@ -207,6 +185,14 @@ class StringBuffer extends Buffer
     }
 
     /**
+     * Destruct object, close file description.
+     */
+    function __destruct()
+    {
+        $this->close();
+    }
+
+    /**
      * Close buffer. If this buffer resource that closes the stream.
      */
     public function close()
@@ -217,11 +203,21 @@ class StringBuffer extends Buffer
     }
 
     /**
-     * Destruct object, close file description.
+     * Relative get method.
+     * Reads the string at this buffer's current position, and then increments the position.
+     *
+     * @param $length
+     * @return string The strings at the buffer's current position
+     * @throws BufferException
      */
-    function __destruct()
+    protected function get($length)
     {
-        $this->close();
+        if ($length > $this->remaining()) {
+            throw new BufferException("get length > remaining");
+        }
+        $str = substr($this->string, $this->position, $length);
+        $this->skip($length);
+        return $str;
     }
 
 }
