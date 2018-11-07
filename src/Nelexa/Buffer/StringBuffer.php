@@ -180,12 +180,15 @@ class StringBuffer extends Buffer
     /**
      * Truncate buffer
      *
+     * @param int $size
      * @return Buffer
      * @throws BufferException
      */
-    final public function truncate()
+    final public function truncate($size = 0)
     {
-        $this->setString('');
+        if ($size < $this->size()){
+            $this->setString(substr($this->string, 0, $size));
+        }
         return $this;
     }
 

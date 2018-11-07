@@ -389,7 +389,7 @@ assert($buffer->toString() === 'Testlue');
 ```
 Remove all bytes. Truncate buffer.
 ```php
-$buffer->truncate();
+$buffer->truncate($size = 0);
 
 // example
 assert($buffer->position() === 0);
@@ -397,7 +397,7 @@ assert($buffer->size() === 0);
 $buffer->insert('Test value');
 assert($buffer->position() === 10);
 assert($buffer->size() === 10);
-$buffer->truncate();
+$buffer->truncate(0);
 assert($buffer->position() === 0);
 assert($buffer->size() === 0);
 ```

@@ -921,9 +921,10 @@ abstract class Buffer
     /**
      * Truncate data
      *
+     * @param int $size
      * @return Buffer
      */
-    abstract public function truncate();
+    abstract public function truncate($size = 0);
 
     /**
      * Close buffer. If this buffer resource that closes the stream.
