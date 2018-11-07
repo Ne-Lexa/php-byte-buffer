@@ -1,4 +1,5 @@
 <?php
+
 namespace Nelexa\Buffer;
 
 /**
@@ -21,10 +22,10 @@ class TempBuffer extends ResourceBuffer
      * @param string $bytes
      * @throws BufferException
      */
-    function __construct($bytes = "")
+    public function __construct($bytes = '')
     {
-        if (($fp = fopen("php://temp", "w+b")) === false) {
-            throw new BufferException("Can not open memory");
+        if (($fp = fopen('php://temp', 'w+b')) === false) {
+            throw new BufferException('Can not open memory');
         }
         if (!empty($bytes)) {
             fwrite($fp, (string)$bytes);

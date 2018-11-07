@@ -1,10 +1,13 @@
 <?php
+
 namespace Nelexa\Buffer;
 
 /**
  * Read And Write Binary Data From Resource.
  *
- * This is class defines methods for reading and writing values of all primitive types. Primitive values are translated to (or from) sequences of bytes according to the buffer's current byte order, which may be retrieved and modified via the order methods. The initial order of a byte buffer is always Buffer::BIG_ENDIAN.
+ * This is class defines methods for reading and writing values of all primitive types. Primitive values are translated
+ * to (or from) sequences of bytes according to the buffer's current byte order, which may be retrieved and modified
+ * via the order methods. The initial order of a byte buffer is always Buffer::BIG_ENDIAN.
  *
  * @author Ne-Lexa alexey@nelexa.ru
  * @license MIT
@@ -20,7 +23,7 @@ class ResourceBuffer extends Buffer
      * @param resource $resource
      * @throws BufferException
      */
-    function __construct($resource)
+    public function __construct($resource)
     {
         $this->setResource($resource);
     }
@@ -32,17 +35,17 @@ class ResourceBuffer extends Buffer
     protected function setResource($resource)
     {
         if ($resource === null) {
-            throw new BufferException("Resource null");
+            throw new BufferException('Resource null');
         }
         if (!is_resource($resource)) {
-            throw new BufferException("invalid type \$resource - is not resource");
+            throw new BufferException('invalid type $resource - is not resource');
         }
         if (!stream_is_local($resource)) {
-            throw new BufferException("invalid argument \$resource - read only resource is not local");
+            throw new BufferException('invalid argument $resource - read only resource is not local');
         }
         $meta = stream_get_meta_data($resource);
         if (!$meta['seekable']) {
-            throw new BufferException("\$resource cannot seekable stream.");
+            throw new BufferException('$resource cannot seekable stream.');
         }
         $stats = fstat($resource);
         if (isset($stats['size'])) {
@@ -60,19 +63,20 @@ class ResourceBuffer extends Buffer
     public function setPosition($position)
     {
         if (!is_numeric($position)) {
-            throw new BufferException("position " . $position . " is not numeric");
+            throw new BufferException('position ' . $position . ' is not numeric');
         }
         if (fseek($this->resource, $position, SEEK_SET) === 0) {
             return parent::setPosition($position);
-        } else {
-            throw new BufferException("set position " . $position . " failure");
         }
+
+        throw new BufferException('set position ' . $position . ' failure');
     }
 
     /**
      * @return string
+     * @throws BufferException
      */
-    public final function toString()
+    final public function toString()
     {
         $position = $this->position;
         $this->rewind();
@@ -90,6 +94,7 @@ class ResourceBuffer extends Buffer
      * get operations.
      *
      * @return Buffer
+     * @throws BufferException
      */
     public function flip()
     {
@@ -107,10 +112,10 @@ class ResourceBuffer extends Buffer
     public function insert($buffer)
     {
         if ($this->isReadOnly()) {
-            throw new BufferException("Read Only");
+            throw new BufferException('Read Only');
         }
         if ($buffer === null) {
-            throw new BufferException("null buffer");
+            throw new BufferException('null buffer');
         }
         if ($buffer instanceof Buffer) {
             $buffer = $buffer->toString();
@@ -124,7 +129,7 @@ class ResourceBuffer extends Buffer
 
         $lengthWrite = fwrite($this->resource, $buffer, $length);
         if ($lengthWrite === false || $lengthWrite !== $length) {
-            throw new BufferException("Not write all bytes. Length: " . $length . ', write length: ' . $lengthWrite);
+            throw new BufferException('Not write all bytes. Length: ' . $length . ', write length: ' . $lengthWrite);
         }
         $this->newLimit($this->size() + $lengthBuffer);
         $this->position += $lengthBuffer;
@@ -144,10 +149,10 @@ class ResourceBuffer extends Buffer
     public function put($buffer)
     {
         if ($this->isReadOnly()) {
-            throw new BufferException("Read Only");
+            throw new BufferException('Read Only');
         }
         if ($buffer === null) {
-            throw new BufferException("null buffer");
+            throw new BufferException('null buffer');
         }
         $length = null;
         if ($buffer instanceof Buffer) {
@@ -157,11 +162,11 @@ class ResourceBuffer extends Buffer
             $length = strlen($buffer);
         }
         if ($length > $this->remaining()) {
-            throw new BufferException("put length > remaining");
+            throw new BufferException('put length > remaining');
         }
         $lengthWrite = fwrite($this->resource, $buffer, $length);
         if ($lengthWrite === false || $lengthWrite !== $length) {
-            throw new BufferException("Not write all bytes. Length: " . $length . ', write length: ' . $lengthWrite);
+            throw new BufferException('Not write all bytes. Length: ' . $length . ', write length: ' . $lengthWrite);
         }
         $this->position += $length;
         return $this;
@@ -177,16 +182,16 @@ class ResourceBuffer extends Buffer
     {
         $length = (int)$length;
         if ($this->isReadOnly()) {
-            throw new BufferException("Read Only");
+            throw new BufferException('Read Only');
         }
         if ($length < 0) {
-            throw new BufferException("length < 0");
+            throw new BufferException('length < 0');
         }
         if ($length > $this->remaining()) {
-            throw new BufferException("replace length > remaining");
+            throw new BufferException('replace length > remaining');
         }
         if ($buffer === null) {
-            throw new BufferException("null buffer");
+            throw new BufferException('null buffer');
         }
         if ($buffer instanceof Buffer) {
             $buffer = $buffer->toString();
@@ -202,7 +207,7 @@ class ResourceBuffer extends Buffer
 
         $lengthWrite = fwrite($this->resource, $buffer, $lengthNewBuffer);
         if ($lengthWrite === false || $lengthWrite !== $lengthNewBuffer) {
-            throw new BufferException("Not write all bytes. Length: " . $lengthNewBuffer . ', write length: ' . $lengthWrite);
+            throw new BufferException('Not write all bytes. Length: ' . $lengthNewBuffer . ', write length: ' . $lengthWrite);
         }
         $this->newLimit($this->size() + $lengthBuffer - $length);
         $this->position += $lengthBuffer;
@@ -217,13 +222,13 @@ class ResourceBuffer extends Buffer
     public function remove($length)
     {
         if ($this->isReadOnly()) {
-            throw new BufferException("Read Only");
+            throw new BufferException('Read Only');
         }
         if ($length < 0) {
-            throw new BufferException("length < 0");
+            throw new BufferException('length < 0');
         }
         if ($length > $this->remaining()) {
-            throw new BufferException("remove length > remaining");
+            throw new BufferException('remove length > remaining');
         }
         $position = $this->position;
         $this->setPosition($position + $length);
@@ -234,7 +239,7 @@ class ResourceBuffer extends Buffer
 
         $lengthWrite = fwrite($this->resource, $buffer, $lengthNewBuffer);
         if ($lengthWrite === false || $lengthWrite !== $lengthNewBuffer) {
-            throw new BufferException("Not write all bytes. Length: " . $lengthNewBuffer . ', write length: ' . $lengthWrite);
+            throw new BufferException('Not write all bytes. Length: ' . $lengthNewBuffer . ', write length: ' . $lengthWrite);
         }
         $this->newLimit($this->size() - $length);
         $this->position += $position;
@@ -247,10 +252,10 @@ class ResourceBuffer extends Buffer
      * @return Buffer
      * @throws BufferException
      */
-    public final function truncate()
+    final public function truncate()
     {
         if ($this->isReadOnly()) {
-            throw new BufferException("Read Only");
+            throw new BufferException('Read Only');
         }
         ftruncate($this->resource, 0);
         $this->rewind();
@@ -261,7 +266,7 @@ class ResourceBuffer extends Buffer
     /**
      * Destruct object, close file description.
      */
-    function __destruct()
+    public function __destruct()
     {
         $this->close();
     }
@@ -288,15 +293,13 @@ class ResourceBuffer extends Buffer
     protected function get($length)
     {
         if (!$this->hasRemaining()) {
-            throw new BufferException("get length > remaining");
+            throw new BufferException('get length > remaining');
         }
         $str = fread($this->resource, $length);
         if ($str === false) {
-            throw new BufferException("error read resource. position - " . $this->position . ', limit: ' . $this->size());
+            throw new BufferException('error read resource. position - ' . $this->position . ', limit: ' . $this->size());
         }
         $this->position += $length;
         return $str;
     }
-
-
 }

@@ -1,6 +1,6 @@
 <?php
-namespace Nelexa\Buffer\BinaryFormat;
 
+namespace Nelexa\Buffer\BinaryFormat;
 
 use Nelexa\Buffer\Buffer;
 

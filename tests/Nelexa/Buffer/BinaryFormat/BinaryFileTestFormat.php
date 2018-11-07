@@ -1,6 +1,6 @@
 <?php
-namespace Nelexa\Buffer\BinaryFormat;
 
+namespace Nelexa\Buffer\BinaryFormat;
 
 use Nelexa\Buffer\Buffer;
 
@@ -36,7 +36,6 @@ class BinaryFileTestFormat implements BinaryFileInterface
         return $instance;
     }
 
-
     /**
      * @return string
      */
@@ -69,7 +68,10 @@ class BinaryFileTestFormat implements BinaryFileInterface
         $this->items = $items;
     }
 
-
+    /**
+     * @param Buffer $buffer
+     * @throws \Nelexa\Buffer\BufferException
+     */
     public function readObject(Buffer $buffer)
     {
         $this->name = $buffer->getUTF();
@@ -82,10 +84,14 @@ class BinaryFileTestFormat implements BinaryFileInterface
         }
     }
 
+    /**
+     * @param Buffer $buffer
+     * @throws \Nelexa\Buffer\BufferException
+     */
     public function writeObject(Buffer $buffer)
     {
         $buffer->insertUTF($this->name);
-        $length = sizeof($this->items);
+        $length = count($this->items);
         $buffer->insertInt($length);
         foreach ($this->items as $item) {
             $item->writeObject($buffer);
