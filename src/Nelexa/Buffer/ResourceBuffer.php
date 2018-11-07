@@ -249,17 +249,18 @@ class ResourceBuffer extends Buffer
     /**
      * Truncate file
      *
+     * @param int $size
      * @return Buffer
      * @throws BufferException
      */
-    final public function truncate()
+    final public function truncate($size = 0)
     {
         if ($this->isReadOnly()) {
             throw new BufferException('Read Only');
         }
-        ftruncate($this->resource, 0);
+        ftruncate($this->resource, $size);
         $this->rewind();
-        $this->newLimit(0);
+        $this->newLimit($size);
         return $this;
     }
 
