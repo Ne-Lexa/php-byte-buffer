@@ -2,7 +2,7 @@
 
 namespace Nelexa\Buffer;
 
-class MemoryResourceBufferTest extends BufferTestCase
+class TempBufferTest extends BufferTestCase
 {
 
     /**
@@ -11,6 +11,6 @@ class MemoryResourceBufferTest extends BufferTestCase
      */
     protected function createBuffer()
     {
-        return new MemoryResourceBuffer();
+        return new TempBuffer();
     }
 }

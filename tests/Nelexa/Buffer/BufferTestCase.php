@@ -1,6 +1,6 @@
 <?php
-namespace Nelexa\Buffer;
 
+namespace Nelexa\Buffer;
 
 use Nelexa\Buffer\BinaryFormat\BinaryFileItem;
 use Nelexa\Buffer\BinaryFormat\BinaryFileTestFormat;
@@ -9,6 +9,7 @@ use Nelexa\Buffer\BinaryFormat\BinaryFileTestFormat;
  * Base class for tests all type buffers.
  *
  * Class BufferTestCase
+ *
  * @package Nelexa\Buffer
  */
 abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
@@ -19,38 +20,44 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
      */
     protected $buffer;
 
+    /**
+     * @throws BufferException
+     */
     public function testBaseFunctional()
     {
-        $this->buffer->insertString("Telephone");
+        $this->buffer->insertString('Telephone');
         $this->buffer->rewind();
-        $this->buffer->putString("My I");
-        $this->assertEquals($this->buffer->toString(), "My Iphone");
+        $this->buffer->putString('My I');
+        $this->assertEquals($this->buffer->toString(), 'My Iphone');
 
         $this->buffer->rewind();
         $this->buffer->replaceString('P', 5);
-        $this->assertEquals($this->buffer->toString(), "Phone");
+        $this->assertEquals($this->buffer->toString(), 'Phone');
 
         $this->buffer->rewind();
         $this->buffer->insertString('Tele');
-        $this->assertEquals($this->buffer->toString(), "TelePhone");
+        $this->assertEquals($this->buffer->toString(), 'TelePhone');
 
         $this->buffer->skip(2);
         $this->buffer->flip();
         $this->assertEquals($this->buffer->position(), 0);
-        $this->assertEquals($this->buffer->toString(), "TelePh");
+        $this->assertEquals($this->buffer->toString(), 'TelePh');
 
         $this->buffer->truncate();
         $this->assertEquals($this->buffer->position(), 0);
         $this->assertEquals($this->buffer->size(), 0);
     }
 
+    /**
+     * @throws BufferException
+     */
     public function testFluent()
     {
         $this->buffer->insertByte(1)
             ->insertBoolean(true)
             ->insertShort(5551)
             ->skip(-2)
-            ->insertUTF("Hello, World")
+            ->insertUTF('Hello, World')
             ->truncate()
             ->insertString(str_rot13('Hello World'))
             ->setPosition(7)
@@ -60,6 +67,9 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->buffer->toString(), str_rot13('Hello W'));
     }
 
+    /**
+     * @throws BufferException
+     */
     public function testInsertFunctional()
     {
         $orders = [Buffer::BIG_ENDIAN, Buffer::LITTLE_ENDIAN];
@@ -117,7 +127,7 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
             $arrayBytes = [0x01, 0x02, 0x03, 0x4, Cast::toByte(Cast::INTEGER_MAX_VALUE)];
             $this->buffer->insertArrayBytes($arrayBytes);
 
-            $string = "String... Строка... 串...
+            $string = 'String... Строка... 串...
  😀 😬 😁 😂 😃 😄 😅 😆 😇 😉 😊 😊 🙂 🙃 ☺️ 😋 😌 😍 😘 
  🇦🇫 🇦🇽 🇦🇱 🇩🇿 🇦🇸 🇦🇩 🇦🇴 🇦🇮 🇦🇶 🇦🇬 🇦🇷 🇦🇲 🇦🇼 🇦🇺 🇦🇹
   🇦🇿 🇧🇸 🇧🇭 🇧🇩 🇧🇧 🇧🇾 🇧🇪 🇧🇿 🇧🇯 🇧🇲 🇧🇹 🇧🇴 🇧🇶 🇧🇦 🇧🇼
@@ -136,7 +146,7 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
      🇸🇽 🇸🇰 🇸🇮 🇸🇧 🇸🇴 🇿🇦 🇬🇸 🇰🇷 🇸🇸 🇪🇸 🇱🇰 🇸🇩 🇸🇷 🇸🇿 
      🇸🇪 🇨🇭 🇸🇾 🇹🇼 🇹🇯 🇹🇿 🇹🇭 🇹🇱 🇹🇬 🇹🇰 🇹🇴 🇹🇹 🇹🇳 🇹🇷 
      🇹🇲 🇹🇨 🇹🇻 🇺🇬 🇺🇦 🇦🇪 🇬🇧 🇺🇸 🇻🇮 🇺🇾 🇺🇿 🇻🇺 🇻🇦 🇻🇪 
-     🇻🇳 🇼🇫 🇪🇭 🇾🇪 🇿🇲 🇿🇼 ";
+     🇻🇳 🇼🇫 🇪🇭 🇾🇪 🇿🇲 🇿🇼 ';
             $lengthString = strlen($string);
 
             $this->buffer->insertString($string);
@@ -240,6 +250,9 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * @throws BufferException
+     */
     public function testPutFunctional()
     {
         $this->buffer->setOrder(Buffer::BIG_ENDIAN);
@@ -260,6 +273,9 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->buffer->getLong(), 98765);
     }
 
+    /**
+     * @throws BufferException
+     */
     public function testReplaceFunctional()
     {
         $this->buffer->insertString('123456789');
@@ -273,6 +289,9 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $this->assertEquals('123456789', $this->buffer->toString());
     }
 
+    /**
+     * @throws BufferException
+     */
     public function testRemoveFunctional()
     {
         $this->buffer->insertString('123456789');
@@ -335,6 +354,9 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $this->buffer->insertBoolean(true);
     }
 
+    /**
+     * @throws BufferException
+     */
     public function testOrder()
     {
         $this->assertEquals($this->buffer->order(), Buffer::BIG_ENDIAN);
@@ -361,6 +383,9 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $this->assertEquals($this->buffer->getLong(), 5000000000);
     }
 
+    /**
+     * @throws BufferException
+     */
     public function testPositions()
     {
         $this->buffer->insertString('Test value');
@@ -458,13 +483,16 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $this->buffer->truncate();
     }
 
+    /**
+     * @throws BufferException
+     */
     public function testBinaryFile()
     {
-        $name = "General Name";
+        $name = 'General Name';
         $items = [
-            BinaryFileItem::create(time() * 1000, ["Category 1", "Category 2"]),
-            BinaryFileItem::create((time() - 3600) * 1000, ["Category 2", "Category 3"]),
-            BinaryFileItem::create((time() - 52222) * 1000, ["Category 4", "Category 2", "Category 7"])
+            BinaryFileItem::create(time() * 1000, ['Category 1', 'Category 2']),
+            BinaryFileItem::create((time() - 3600) * 1000, ['Category 2', 'Category 3']),
+            BinaryFileItem::create((time() - 52222) * 1000, ['Category 4', 'Category 2', 'Category 7']),
         ];
 
         $binaryFileActual = BinaryFileTestFormat::create($name, $items);
@@ -480,6 +508,7 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
 
     /**
      * Set up
+     *
      * @throws \AssertionError
      */
     protected function setUp()
@@ -501,5 +530,4 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         parent::tearDown();
         $this->buffer->close();
     }
-
 }

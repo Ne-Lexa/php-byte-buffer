@@ -1,6 +1,6 @@
 <?php
-namespace Nelexa\Buffer;
 
+namespace Nelexa\Buffer;
 
 class Cast
 {
@@ -57,12 +57,13 @@ class Cast
      *
      * @param int $i
      * @return int
-     * @throws BufferException
      */
     public static function toByte($i)
     {
-        $i = self::toUnsignedByte($i);
-        if ($i < 128) return $i;
+        $i &= 0xff;
+        if ($i < 128) {
+            return $i;
+        }
         return $i - 256;
     }
 
@@ -71,14 +72,10 @@ class Cast
      *
      * @param int $i
      * @return int
-     * @throws BufferException
      */
     public static function toUnsignedByte($i)
     {
-        if (!is_numeric($i)) {
-            throw new BufferException("Cast To Byte Error - param \$i no numeric");
-        }
-        return (int)($i & 0xff);
+        return $i & 0xff;
     }
 
     /**
@@ -86,12 +83,13 @@ class Cast
      *
      * @param int $i
      * @return int
-     * @throws BufferException
      */
     public static function toShort($i)
     {
-        $i = self::toUnsignedShort($i);
-        if ($i < 32768) return $i;
+        $i &= 0xffff;
+        if ($i < 32768) {
+            return $i;
+        }
         return $i - 65536;
     }
 
@@ -100,14 +98,10 @@ class Cast
      *
      * @param int $i
      * @return int
-     * @throws BufferException
      */
     public static function toUnsignedShort($i)
     {
-        if (!is_numeric($i)) {
-            throw new BufferException("Cast To Short Error - param \$i no numeric");
-        }
-        return (int)($i & 0xffff);
+        return $i & 0xffff;
     }
 
     /**
@@ -115,12 +109,13 @@ class Cast
      *
      * @param int $i
      * @return int
-     * @throws BufferException
      */
     public static function toInt($i)
     {
-        $i = self::toUnsignedInt($i);
-        if ($i < 2147483648) return $i;
+        $i &= 0xffffffff;
+        if ($i < 2147483648) {
+            return $i;
+        }
         return $i - 4294967296;
     }
 
@@ -129,14 +124,10 @@ class Cast
      *
      * @param int $i
      * @return int
-     * @throws BufferException
      */
     public static function toUnsignedInt($i)
     {
-        if (!is_numeric($i)) {
-            throw new BufferException("Cast To Integer Error - param \$i no numeric");
-        }
-        return (int)($i & 0xffffffff);
+        return $i & 0xffffffff;
     }
 
     /**
@@ -144,17 +135,17 @@ class Cast
      *
      * @param int $i
      * @return int
-     * @throws BufferException
      */
     public static function toLong($i)
     {
         $i = (int)$i;
         if ($i > static::LONG_MAX_VALUE) {
-            throw new BufferException('Invalid long value');
-        } elseif ($i < static::LONG_MIN_VALUE) {
-            throw new BufferException('Invalid long value');
+            throw new \RuntimeException('Invalid long value');
+        }
+
+        if ($i < static::LONG_MIN_VALUE) {
+            throw new \RuntimeException('Invalid long value');
         }
         return $i;
     }
-
 }

@@ -1,18 +1,21 @@
 <?php
+
 namespace Nelexa\Buffer;
 
 /**
  * Read And Write Binary Data
  *
- * This is class defines methods for reading and writing values of all primitive types. Primitive values are translated to (or from) sequences of bytes according to the buffer's current byte order, which may be retrieved and modified via the order methods. The initial order of a byte buffer is always Buffer::BIG_ENDIAN.
+ * This is class defines methods for reading and writing values of all primitive types. Primitive values are translated
+ * to (or from) sequences of bytes according to the buffer's current byte order, which may be retrieved and modified
+ * via the order methods. The initial order of a byte buffer is always Buffer::BIG_ENDIAN.
  *
  * @author Ne-Lexa alexey@nelexa.ru
  * @license MIT
  */
 abstract class Buffer
 {
-    const BIG_ENDIAN = "BIG_ENDIAN";
-    const LITTLE_ENDIAN = "LITTLE_ENDIAN";
+    const BIG_ENDIAN = 'BIG_ENDIAN';
+    const LITTLE_ENDIAN = 'LITTLE_ENDIAN';
 
     /**
      * @var int
@@ -36,7 +39,7 @@ abstract class Buffer
      *
      * @return int
      */
-    public final function position()
+    final public function position()
     {
         return $this->position;
     }
@@ -55,8 +58,9 @@ abstract class Buffer
      * $buf->get(5);                // get 5 bytes (Hello)
      *
      * @return Buffer
+     * @throws BufferException
      */
-    public final function rewind()
+    final public function rewind()
     {
         $this->setPosition(0);
         return $this;
@@ -122,7 +126,7 @@ abstract class Buffer
      * @param string $order The new byte order, either Buffer::BIG_ENDIAN or Buffer::LITTLE_ENDIAN
      * @return Buffer
      */
-    public final function setOrder($order)
+    final public function setOrder($order)
     {
         $this->orderLittleEndian = $order === self::LITTLE_ENDIAN;
         return $this;
@@ -144,6 +148,7 @@ abstract class Buffer
      * Skip 1 byte
      *
      * @return Buffer
+     * @throws BufferException
      */
     public function skipByte()
     {
@@ -156,6 +161,7 @@ abstract class Buffer
      *
      * @param int $n The number of bytes to be skipped. The value may be negative.
      * @return Buffer
+     * @throws BufferException
      */
     public function skip($n)
     {
@@ -167,6 +173,7 @@ abstract class Buffer
      * Skip short (2 bytes)
      *
      * @return Buffer
+     * @throws BufferException
      */
     public function skipShort()
     {
@@ -178,6 +185,7 @@ abstract class Buffer
      * Skip int (4 bytes)
      *
      * @return Buffer
+     * @throws BufferException
      */
     public function skipInt()
     {
@@ -189,6 +197,7 @@ abstract class Buffer
      * Skip long (8 bytes)
      *
      * @return Buffer
+     * @throws BufferException
      */
     public function skipLong()
     {
@@ -219,7 +228,7 @@ abstract class Buffer
      */
     public function getUnsignedByte()
     {
-        return current(unpack('C', $this->get(1)));
+        return unpack('C', $this->get(1))[1];
     }
 
     /**
@@ -266,11 +275,11 @@ abstract class Buffer
      */
     public function getUnsignedShort()
     {
-        return current(unpack($this->orderLittleEndian ? 'v' : 'n', $this->get(2)));
+        return unpack($this->orderLittleEndian ? 'v' : 'n', $this->get(2))[1];
     }
 
     /**
-     * Reads four input bytes and returns an int value
+     * Reads four input bytes and returns an unsigned short value
      * in the range -2147483648 through 2147483647.
      *
      * @return int the int value read.
@@ -282,7 +291,7 @@ abstract class Buffer
     }
 
     /**
-     * Reads four input bytes and returns an long value
+     * Reads four input bytes and returns an unsigned int value
      * in the range 0 through 4294967296.
      *
      * @return int the unsigned int value read.
@@ -290,7 +299,7 @@ abstract class Buffer
      */
     public function getUnsignedInt()
     {
-        return current(unpack($this->orderLittleEndian ? 'V' : 'N', $this->get(4)));
+        return unpack($this->orderLittleEndian ? 'V' : 'N', $this->get(4))[1];
     }
 
     /**
@@ -303,23 +312,24 @@ abstract class Buffer
     public function getLong()
     {
         $data = $this->get(8);
-        if (version_compare(PHP_VERSION, '5.6.3') >= 0) {
-            return current(unpack($this->orderLittleEndian ? 'P' : 'J', $data));
+        if (PHP_VERSION_ID >= 50603) {
+            return unpack($this->orderLittleEndian ? 'P' : 'J', $data)[1];
         }
+
         if ($this->orderLittleEndian) {
             $unpack = unpack('Va/Vb', $data);
             return $unpack['a'] + ($unpack['b'] << 32);
-        } else {
-            $unpack = unpack('Na/Nb', $data);
-            return ($unpack['a'] << 32) | $unpack['b'];
         }
+
+        $unpack = unpack('Na/Nb', $data);
+        return ($unpack['a'] << 32) | $unpack['b'];
     }
 
     /**
      * Reads $length bytes from an input stream.
      *
      * @param $length int
-     * @return array
+     * @return int[]
      * @throws BufferException
      */
     public function getArrayBytes($length)
@@ -329,7 +339,7 @@ abstract class Buffer
                 unpack('c*', $this->get($length))
             );
         }
-        return array();
+        return [];
     }
 
     /**
@@ -351,10 +361,9 @@ abstract class Buffer
     {
         $size = $this->getUnsignedShort();
         if ($size > 0) {
-            $string = $this->getString($size);
-            return $string;
+            return $this->getString($size);
         }
-        return "";
+        return '';
     }
 
     /**
@@ -369,7 +378,7 @@ abstract class Buffer
         if ($length > 0) {
             return $this->get($length);
         }
-        return "";
+        return '';
     }
 
     /**
@@ -378,13 +387,14 @@ abstract class Buffer
      * @param $length int
      * @return string
      * @throws BufferException
+     * @deprecated
      */
     public function getUTF16($length)
     {
         if ($length > 0) {
             return implode('', array_map('chr', array_values(unpack('S*', $this->get($length << 1)))));
         }
-        return "";
+        return '';
     }
 
     /**
@@ -416,7 +426,7 @@ abstract class Buffer
     protected function writeBoolean($bool)
     {
         if ($bool === null) {
-            throw new BufferException("null boolean");
+            throw new BufferException('null boolean');
         }
         return pack('c', $bool ? 1 : 0);
     }
@@ -441,7 +451,7 @@ abstract class Buffer
     protected function writeByte($byte)
     {
         if ($byte === null) {
-            throw new BufferException("null byte");
+            throw new BufferException('null byte');
         }
         return pack('c', $byte);
     }
@@ -466,7 +476,7 @@ abstract class Buffer
     protected function writeShort($v)
     {
         if ($v === null) {
-            throw new BufferException("null short");
+            throw new BufferException('null short');
         }
         return pack($this->orderLittleEndian ? 'v' : 'n', $v);
     }
@@ -491,7 +501,7 @@ abstract class Buffer
     protected function writeInt($v)
     {
         if ($v === null) {
-            throw new BufferException("null int");
+            throw new BufferException('null int');
         }
         return pack($this->orderLittleEndian ? 'V' : 'N', $v);
     }
@@ -516,10 +526,10 @@ abstract class Buffer
     protected function writeLong($v)
     {
         if ($v === null) {
-            throw new BufferException("null long");
+            throw new BufferException('null long');
         }
-        if (version_compare(PHP_VERSION, '5.6.3') >= 0) {
-            return pack($this->orderLittleEndian ? "P" : "J", $v);
+        if (PHP_VERSION_ID >= 50603) {
+            return pack($this->orderLittleEndian ? 'P' : 'J', $v);
         }
 
         $left = 0xffffffff00000000;
@@ -528,11 +538,11 @@ abstract class Buffer
             $r = ($v & $left) >> 32;
             $l = $v & $right;
             return pack('VV', $l, $r);
-        } else {
-            $l = ($v & $left) >> 32;
-            $r = $v & $right;
-            return pack('NN', $l, $r);
         }
+
+        $l = ($v & $left) >> 32;
+        $r = $v & $right;
+        return pack('NN', $l, $r);
     }
 
     /**
@@ -574,7 +584,7 @@ abstract class Buffer
      */
     protected function writeArrayBytes(array $bytes)
     {
-        return call_user_func_array("pack", array_merge(array('c*'), $bytes));
+        return call_user_func_array('pack', array_merge(['c*'], $bytes));
     }
 
     /**
@@ -613,7 +623,7 @@ abstract class Buffer
             throw new BufferException('$str is null');
         }
         $bytes = unpack('c*', $str);
-        $length = sizeof($bytes);
+        $length = count($bytes);
         if ($length > 65535) {
             throw new BufferException('Encoded string too long: ' . $length . ' bytes');
         }
@@ -627,6 +637,7 @@ abstract class Buffer
      * @param string $string
      * @return Buffer
      * @throws BufferException
+     * @deprecated
      */
     public function insertUTF16($string)
     {
@@ -637,6 +648,7 @@ abstract class Buffer
      * @param string $string
      * @return string
      * @throws BufferException
+     * @deprecated
      */
     protected function writeUTF16($string)
     {
@@ -762,6 +774,7 @@ abstract class Buffer
      * @param string $str
      * @return Buffer
      * @throws BufferException
+     * @deprecated
      */
     public function putUTF16($str)
     {
@@ -889,6 +902,7 @@ abstract class Buffer
      * @param int $length
      * @return Buffer
      * @throws BufferException
+     * @deprecated
      */
     public function replaceUTF16($str, $length)
     {
@@ -924,7 +938,7 @@ abstract class Buffer
     /**
      * @return string
      */
-    function __toString()
+    public function __toString()
     {
         return get_called_class() . '{' .
             'position=' . $this->position .
@@ -939,7 +953,7 @@ abstract class Buffer
      *
      * @return int The limit of this buffer
      */
-    public final function size()
+    final public function size()
     {
         return $this->limit;
     }
@@ -956,7 +970,7 @@ abstract class Buffer
      *
      * @return string This buffer's byte order
      */
-    public final function order()
+    final public function order()
     {
         return $this->orderLittleEndian ? self::LITTLE_ENDIAN : self::BIG_ENDIAN;
     }
@@ -966,7 +980,7 @@ abstract class Buffer
      *
      * @return boolean
      */
-    public final function isReadOnly()
+    final public function isReadOnly()
     {
         return $this->isReadOnly;
     }
@@ -982,7 +996,7 @@ abstract class Buffer
     protected function newLimit($newLimit)
     {
         if ($newLimit < 0) {
-            throw new BufferException("New Limit < 0");
+            throw new BufferException('New Limit < 0');
         }
         $this->limit = $newLimit;
         if ($this->position > $this->limit) {
@@ -999,9 +1013,8 @@ abstract class Buffer
      *
      * @return bool
      */
-    protected final function isOrderLE()
+    final protected function isOrderLE()
     {
         return $this->orderLittleEndian;
     }
-
 }

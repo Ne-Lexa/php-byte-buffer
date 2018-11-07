@@ -1,6 +1,6 @@
 <?php
-namespace Nelexa\Buffer\BinaryFormat;
 
+namespace Nelexa\Buffer\BinaryFormat;
 
 use Nelexa\Buffer\Buffer;
 
@@ -63,8 +63,11 @@ class BinaryFileItem implements BinaryFileInterface
         $this->categories = $categories;
     }
 
-
-    function readObject(Buffer $buffer)
+    /**
+     * @param Buffer $buffer
+     * @throws \Nelexa\Buffer\BufferException
+     */
+    public function readObject(Buffer $buffer)
     {
         $this->timeMillis = $buffer->getLong();
         $length = $buffer->getInt();
@@ -74,12 +77,16 @@ class BinaryFileItem implements BinaryFileInterface
         }
     }
 
-    function writeObject(Buffer $buffer)
+    /**
+     * @param Buffer $buffer
+     * @throws \Nelexa\Buffer\BufferException
+     */
+    public function writeObject(Buffer $buffer)
     {
         $buffer->insertLong($this->timeMillis);
-        $length = sizeof($this->categories);
+        $length = count($this->categories);
         $buffer->insertInt($length);
-        for ($i = 0; $i < $length; $i++) {
+        foreach ($this->categories as $i => $iValue) {
             $buffer->insertUTF($this->categories[$i]);
         }
     }

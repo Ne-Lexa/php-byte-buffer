@@ -1,11 +1,13 @@
 <?php
-namespace Nelexa\Buffer;
 
+namespace Nelexa\Buffer;
 
 /**
  * Read And Write Binary Data From String.
  *
- * This is class defines methods for reading and writing values of all primitive types. Primitive values are translated to (or from) sequences of bytes according to the buffer's current byte order, which may be retrieved and modified via the order methods. The initial order of a byte buffer is always Buffer::BIG_ENDIAN.
+ * This is class defines methods for reading and writing values of all primitive types. Primitive values are translated
+ * to (or from) sequences of bytes according to the buffer's current byte order, which may be retrieved and modified
+ * via the order methods. The initial order of a byte buffer is always Buffer::BIG_ENDIAN.
  *
  * @author Ne-Lexa alexey@nelexa.ru
  * @license MIT
@@ -23,18 +25,19 @@ class StringBuffer extends Buffer
      * @param string $string
      * @throws BufferException
      */
-    function __construct($string = "")
+    public function __construct($string = '')
     {
         if ($string === null) {
-            throw new BufferException("null Bytes");
+            throw new BufferException('null bytes');
         }
         $this->setString($string);
     }
 
     /**
      * @param string $string
+     * @throws BufferException
      */
-    public final function setString($string)
+    final public function setString($string)
     {
         $this->string = $string;
         $this->rewind();
@@ -44,7 +47,7 @@ class StringBuffer extends Buffer
     /**
      * @return string
      */
-    public final function toString()
+    final public function toString()
     {
         return $this->string;
     }
@@ -58,8 +61,9 @@ class StringBuffer extends Buffer
      * get operations.
      *
      * @return Buffer
+     * @throws BufferException
      */
-    public final function flip()
+    final public function flip()
     {
         $this->setString(substr($this->string, 0, $this->position));
         $this->setPosition(0);
@@ -74,10 +78,10 @@ class StringBuffer extends Buffer
     public function insert($buffer)
     {
         if ($this->isReadOnly()) {
-            throw new BufferException("Read Only");
+            throw new BufferException('Read Only');
         }
         if ($buffer === null) {
-            throw new BufferException("null buffer");
+            throw new BufferException('null buffer');
         }
         if ($buffer instanceof Buffer) {
             $buffer = $buffer->toString();
@@ -102,10 +106,10 @@ class StringBuffer extends Buffer
     public function put($buffer)
     {
         if ($this->isReadOnly()) {
-            throw new BufferException("Read Only");
+            throw new BufferException('Read Only');
         }
         if ($buffer === null) {
-            throw new BufferException("null buffer");
+            throw new BufferException('null buffer');
         }
         if ($buffer instanceof Buffer) {
             $length = $buffer->size();
@@ -114,7 +118,7 @@ class StringBuffer extends Buffer
             $length = strlen($buffer);
         }
         if ($length > $this->remaining()) {
-            throw new BufferException("put length > remaining");
+            throw new BufferException('put length > remaining');
         }
         $this->string = substr_replace($this->string, $buffer, $this->position, $length);
         $this->skip($length);
@@ -131,16 +135,16 @@ class StringBuffer extends Buffer
     {
         $length = (int)$length;
         if ($this->isReadOnly()) {
-            throw new BufferException("Read Only");
+            throw new BufferException('Read Only');
         }
         if ($length < 0) {
-            throw new BufferException("length < 0");
+            throw new BufferException('length < 0');
         }
         if ($length > $this->remaining()) {
-            throw new BufferException("replace length > remaining");
+            throw new BufferException('replace length > remaining');
         }
         if ($buffer === null) {
-            throw new BufferException("null buffer");
+            throw new BufferException('null buffer');
         }
         if ($buffer instanceof Buffer) {
             $buffer = $buffer->toString();
@@ -157,16 +161,16 @@ class StringBuffer extends Buffer
      * @return Buffer
      * @throws BufferException
      */
-    public final function remove($length)
+    final public function remove($length)
     {
         if ($this->isReadOnly()) {
-            throw new BufferException("Read Only");
+            throw new BufferException('Read Only');
         }
         if ($length < 0) {
-            throw new BufferException("length < 0");
+            throw new BufferException('length < 0');
         }
         if ($length > $this->remaining()) {
-            throw new BufferException("remove length > remaining");
+            throw new BufferException('remove length > remaining');
         }
         $this->string = substr_replace($this->string, '', $this->position, $length);
         $this->newLimit($this->size() - $length);
@@ -177,17 +181,18 @@ class StringBuffer extends Buffer
      * Truncate buffer
      *
      * @return Buffer
+     * @throws BufferException
      */
-    public final function truncate()
+    final public function truncate()
     {
-        $this->setString("");
+        $this->setString('');
         return $this;
     }
 
     /**
      * Destruct object, close file description.
      */
-    function __destruct()
+    public function __destruct()
     {
         $this->close();
     }
@@ -213,11 +218,10 @@ class StringBuffer extends Buffer
     protected function get($length)
     {
         if ($length > $this->remaining()) {
-            throw new BufferException("get length > remaining");
+            throw new BufferException('get length > remaining');
         }
         $str = substr($this->string, $this->position, $length);
         $this->skip($length);
         return $str;
     }
-
 }

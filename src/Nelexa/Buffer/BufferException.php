@@ -1,4 +1,5 @@
 <?php
+
 namespace Nelexa\Buffer;
 
 /**
@@ -9,5 +10,4 @@ namespace Nelexa\Buffer;
  */
 class BufferException extends \Exception
 {
-
 }

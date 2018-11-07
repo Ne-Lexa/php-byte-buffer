@@ -1,6 +1,6 @@
 <?php
-namespace Nelexa\Buffer;
 
+namespace Nelexa\Buffer;
 
 class FileBufferTest extends BufferTestCase
 {
@@ -33,6 +33,7 @@ class FileBufferTest extends BufferTestCase
 
     /**
      * @return Buffer
+     * @throws BufferException
      */
     protected function createBuffer()
     {

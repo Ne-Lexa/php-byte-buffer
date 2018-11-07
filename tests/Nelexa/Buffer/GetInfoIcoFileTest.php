@@ -1,6 +1,6 @@
 <?php
-namespace Nelexa\Buffer\Nelexa\Buffer;
 
+namespace Nelexa\Buffer\Nelexa\Buffer;
 
 use Nelexa\Buffer\Buffer;
 use Nelexa\Buffer\FileBuffer;
@@ -9,6 +9,7 @@ class GetInfoIcoFileTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @see https://en.wikipedia.org/wiki/ICO_(file_format)
+     * @throws \Nelexa\Buffer\BufferException
      */
     public function testIcoInfo()
     {
