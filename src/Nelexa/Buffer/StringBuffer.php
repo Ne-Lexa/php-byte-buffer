@@ -186,7 +186,7 @@ class StringBuffer extends Buffer
      */
     final public function truncate($size = 0)
     {
-        if ($size < $this->size()){
+        if ($size < $this->size()) {
             $this->setString(substr($this->string, 0, $size));
         }
         return $this;

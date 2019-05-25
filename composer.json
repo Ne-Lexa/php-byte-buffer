@@ -1,6 +1,6 @@
 {
   "name": "nelexa/buffer",
-  "description": "Reading And Writing Binary Data (incl. primitive types, ex. byte, ubyte, short, ushort, int, uint, long). The classes also help with porting the I/O operations of the JAVA code.",
+  "description": "Reading And Writing Binary Data (incl. primitive types, ex. byte, ubyte, short, ushort, int, uint, long, float, double). The classes also help with porting the I/O operations of the JAVA code.",
   "type": "library",
   "keywords": [
     "binary",
@@ -12,6 +12,8 @@
     "int",
     "uint",
     "long",
+    "float",
+    "double",
     "io",
     "java",
     "pack",
