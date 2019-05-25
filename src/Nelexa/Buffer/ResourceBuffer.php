@@ -65,7 +65,7 @@ class ResourceBuffer extends Buffer
         if (!is_numeric($position)) {
             throw new BufferException('position ' . $position . ' is not numeric');
         }
-        if (fseek($this->resource, $position, SEEK_SET) === 0) {
+        if (fseek($this->resource, $position) === 0) {
             return parent::setPosition($position);
         }
 

@@ -34,6 +34,13 @@ abstract class Buffer
      */
     private $isReadOnly = false;
 
+    protected static function checkPhpSupport()
+    {
+        if (PHP_VERSION_ID < 70015 || PHP_VERSION_ID === 70100) {
+            throw new \RuntimeException('Operation not supported for PHP versions less than 7.0.15 and 7.1.1. Current version ' . PHP_VERSION);
+        }
+    }
+
     /**
      * Get buffer position
      *
@@ -62,8 +69,7 @@ abstract class Buffer
      */
     final public function rewind()
     {
-        $this->setPosition(0);
-        return $this;
+        return $this->setPosition(0);
     }
 
     /**
@@ -120,11 +126,11 @@ abstract class Buffer
     /**
      * Modifies this buffer's byte order.
      *
+     * @param string $order The new byte order, either Buffer::BIG_ENDIAN or Buffer::LITTLE_ENDIAN
+     * @return Buffer
      * @see Buffer::BIG_ENDIAN
      * @see Buffer::LITTLE_ENDIAN
      *
-     * @param string $order The new byte order, either Buffer::BIG_ENDIAN or Buffer::LITTLE_ENDIAN
-     * @return Buffer
      */
     final public function setOrder($order)
     {
@@ -152,8 +158,7 @@ abstract class Buffer
      */
     public function skipByte()
     {
-        $this->skip(1);
-        return $this;
+        return $this->skip(1);
     }
 
     /**
@@ -165,8 +170,7 @@ abstract class Buffer
      */
     public function skip($n)
     {
-        $this->setPosition($this->position + $n);
-        return $this;
+        return $this->setPosition($this->position + $n);
     }
 
     /**
@@ -177,8 +181,7 @@ abstract class Buffer
      */
     public function skipShort()
     {
-        $this->skip(2);
-        return $this;
+        return $this->skip(2);
     }
 
     /**
@@ -189,8 +192,7 @@ abstract class Buffer
      */
     public function skipInt()
     {
-        $this->skip(4);
-        return $this;
+        return $this->skip(4);
     }
 
     /**
@@ -201,8 +203,29 @@ abstract class Buffer
      */
     public function skipLong()
     {
-        $this->skip(8);
-        return $this;
+        return $this->skip(8);
+    }
+
+    /**
+     * Skip float (4 bytes)
+     *
+     * @return $this
+     * @throws BufferException
+     */
+    public function skipFloat()
+    {
+        return $this->skip(4);
+    }
+
+    /**
+     * Skip double (8 bytes)
+     *
+     * @return $this
+     * @throws BufferException
+     */
+    public function skipDouble()
+    {
+        return $this->skip(8);
     }
 
     /**
@@ -323,6 +346,30 @@ abstract class Buffer
 
         $unpack = unpack('Na/Nb', $data);
         return ($unpack['a'] << 32) | $unpack['b'];
+    }
+
+    /**
+     * Reads four input bytes and returns a float value
+     *
+     * @return float the float value read.
+     * @throws BufferException
+     */
+    public function getFloat()
+    {
+        self::checkPhpSupport();
+        return unpack($this->orderLittleEndian ? 'g' : 'G', $this->get(4))[1];
+    }
+
+    /**
+     * Reads four input bytes and returns a double value
+     *
+     * @return double the double value read.
+     * @throws BufferException
+     */
+    public function getDouble()
+    {
+        self::checkPhpSupport();
+        return unpack($this->orderLittleEndian ? 'e' : 'E', $this->get(8))[1];
     }
 
     /**
@@ -546,6 +593,58 @@ abstract class Buffer
     }
 
     /**
+     * Insert float value
+     *
+     * @param float $v
+     * @return Buffer
+     * @throws BufferException
+     */
+    public function insertFloat($v)
+    {
+        return $this->insert($this->writeFloat($v));
+    }
+
+    /**
+     * @param float $v
+     * @return string
+     * @throws BufferException
+     */
+    protected function writeFloat($v)
+    {
+        self::checkPhpSupport();
+        if ($v === null) {
+            throw new BufferException('null float');
+        }
+        return pack($this->orderLittleEndian ? 'g' : 'G', $v);
+    }
+
+    /**
+     * Insert double value
+     *
+     * @param double $v
+     * @return Buffer
+     * @throws BufferException
+     */
+    public function insertDouble($v)
+    {
+        return $this->insert($this->writeDouble($v));
+    }
+
+    /**
+     * @param double $v
+     * @return string
+     * @throws BufferException
+     */
+    protected function writeDouble($v)
+    {
+        self::checkPhpSupport();
+        if ($v === null) {
+            throw new BufferException('null double');
+        }
+        return pack($this->orderLittleEndian ? 'e' : 'E', $v);
+    }
+
+    /**
      * Insert string
      *
      * @param string $string
@@ -591,11 +690,11 @@ abstract class Buffer
      * Writes a string to the underlying output stream using
      * modified UTF-8 encoding in a machine-independent manner.
      *
-     * @see Buffer::writeUTF()
-     *
      * @param string $string
      * @return Buffer
      * @throws BufferException
+     * @see Buffer::writeUTF()
+     *
      */
     public function insertUTF($string)
     {
@@ -733,6 +832,30 @@ abstract class Buffer
     }
 
     /**
+     * Put float value
+     *
+     * @param float $v
+     * @return Buffer
+     * @throws BufferException
+     */
+    public function putFloat($v)
+    {
+        return $this->put($this->writeFloat($v));
+    }
+
+    /**
+     * Put double value
+     *
+     * @param double $v
+     * @return Buffer
+     * @throws BufferException
+     */
+    public function putDouble($v)
+    {
+        return $this->put($this->writeDouble($v));
+    }
+
+    /**
      * Put string
      *
      * @param string $string
@@ -857,6 +980,32 @@ abstract class Buffer
     }
 
     /**
+     * Replace float value
+     *
+     * @param float $v
+     * @param int $length
+     * @return Buffer
+     * @throws BufferException
+     */
+    public function replaceFloat($v, $length)
+    {
+        return $this->replace($this->writeFloat($v), $length);
+    }
+
+    /**
+     * Replace double value
+     *
+     * @param double $v
+     * @param int $length
+     * @return Buffer
+     * @throws BufferException
+     */
+    public function replaceDouble($v, $length)
+    {
+        return $this->replace($this->writeDouble($v), $length);
+    }
+
+    /**
      * Replace string
      *
      * @param string $string
@@ -966,10 +1115,10 @@ abstract class Buffer
      * when creating buffers that are views of this byte buffer. The order of
      * a newly-created byte buffer is always Buffer::BIG_ENDIAN
      *
-     * @see Buffer::BIG_ENDIAN
+     * @return string This buffer's byte order
      * @see Buffer::LITTLE_ENDIAN
      *
-     * @return string This buffer's byte order
+     * @see Buffer::BIG_ENDIAN
      */
     final public function order()
     {
@@ -1009,10 +1158,10 @@ abstract class Buffer
     /**
      * Buffer's byte order is Buffer::LITTLE_ENDIAN
      *
-     * @see Buffer::BIG_ENDIAN
+     * @return bool
      * @see Buffer::LITTLE_ENDIAN
      *
-     * @return bool
+     * @see Buffer::BIG_ENDIAN
      */
     final protected function isOrderLE()
     {

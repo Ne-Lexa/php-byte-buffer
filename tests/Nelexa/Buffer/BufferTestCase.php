@@ -21,6 +21,31 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
     protected $buffer;
 
     /**
+     * Set up
+     *
+     * @throws \AssertionError
+     */
+    protected function setUp()
+    {
+        parent::setUp();
+        $this->buffer = $this->createBuffer();
+        if (!($this->buffer instanceof Buffer)) {
+            throw new \AssertionError('$buffer can\'t implements Buffer');
+        }
+    }
+
+    protected function tearDown()
+    {
+        parent::tearDown();
+        $this->buffer->close();
+    }
+
+    /**
+     * @return Buffer
+     */
+    abstract protected function createBuffer();
+
+    /**
      * @throws BufferException
      */
     public function testBaseFunctional()
@@ -507,27 +532,52 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Set up
-     *
-     * @throws \AssertionError
+     * @throws BufferException
+     * @requires PHP 7.0.15
      */
-    protected function setUp()
+    public function testDouble()
     {
-        parent::setUp();
-        $this->buffer = $this->createBuffer();
-        if (!($this->buffer instanceof Buffer)) {
-            throw new \AssertionError('$buffer can\'t implements Buffer');
-        }
+        $double = 12.6664287277627762; // 64 bit
+
+        $buffer = $this->createBuffer();
+
+        $buffer->insertDouble($double);
+        $this->assertEquals($buffer->size(), 8);
+
+        $buffer->rewind();
+        $this->assertEquals($buffer->getDouble(), $double);
+        $this->assertEquals($buffer->position(), 8);
+
+        $buffer->rewind();
+        $buffer->skipDouble();
+        $this->assertEquals($buffer->position(), 8);
+
+        $buffer->rewind();
+        $this->assertEquals($buffer->getArrayBytes(8), [64, 41, 85, 54, 37, 109, -74, 71]);
     }
 
     /**
-     * @return Buffer
+     * @throws BufferException
+     * @requires PHP 7.0.15
      */
-    abstract protected function createBuffer();
-
-    protected function tearDown()
+    public function testFloat()
     {
-        parent::tearDown();
-        $this->buffer->close();
+        $float = 12.666428565979; // 32 bit
+
+        $buffer = $this->createBuffer();
+
+        $buffer->insertFloat($float);
+        $this->assertEquals($buffer->size(), 4);
+
+        $buffer->rewind();
+        $this->assertEquals($buffer->getFloat(), $float);
+        $this->assertEquals($buffer->position(), 4);
+
+        $buffer->rewind();
+        $buffer->skipFloat();
+        $this->assertEquals($buffer->position(), 4);
+
+        $buffer->rewind();
+        $this->assertEquals($buffer->getArrayBytes(4), [65, 74, -87, -79]);
     }
 }

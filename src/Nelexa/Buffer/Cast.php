@@ -112,11 +112,14 @@ class Cast
      */
     public static function toInt($i)
     {
-        $i &= 0xffffffff;
-        if ($i < 2147483648) {
-            return $i;
+        if (PHP_INT_SIZE === 8) {
+            $i &= 0xffffffff;
+            if ($i < 2147483648) {
+                return $i;
+            }
+            return $i - 4294967296;
         }
-        return $i - 4294967296;
+        return $i;
     }
 
     /**

@@ -1,4 +1,10 @@
-# `php-buffer` -> Read And Write Binary Data
+# `nelexa/buffer` -> Read And Write Binary Data
+
+[![Packagist Version](https://img.shields.io/packagist/v/nelexa/buffer.svg)](https://packagist.org/packages/nelexa/buffer)
+[![Packagist](https://img.shields.io/packagist/dt/nelexa/buffer.svg?color=%23ff007f)](https://packagist.org/packages/nelexa/buffer)
+[![Build Status](https://travis-ci.org/Ne-Lexa/php-byte-buffer.svg?branch=master)](https://travis-ci.org/Ne-Lexa/php-byte-buffer
+)
+[![License](https://img.shields.io/packagist/l/nelexa/buffer.svg)](https://packagist.org/packages/nelexa/buffer)
 
 This is classes defines methods for **reading and writing** values of all primitive types. Primitive values are translated to (or from) sequences of bytes according to the buffer's current byte order, which may be retrieved and modified via the order methods. The initial order of a byte buffer is always Buffer::BIG_ENDIAN.
  
@@ -50,7 +56,7 @@ Checking the possibility of recording in the buffer
 $boolValue = $buffer->isReadOnly();
 ```
 
-Modifies this buffer's byte order, either Buffer::BIG_ENDIAN or Buffer::LITTLE_ENDIAN
+Modifies this buffer's byte order, either `Buffer::BIG_ENDIAN` or `Buffer::LITTLE_ENDIAN`
 ```php
 $buffer->setOrder(\Nelexa\Buffer::LITTLE_ENDIAN);
 ```
@@ -94,6 +100,8 @@ $buffer->skipByte(); // skip 1 byte
 $buffer->skipShort(); // skip 2 bytes
 $buffer->skipInt(); // skip 4 bytes
 $buffer->skipLong(); // skip 8 bytes
+$buffer->skipFloat(); // skip 4 bytes
+$buffer->skipDouble(); // skip 8 bytes
 ```
 
 Rewinds this buffer. The position is set to zero.
@@ -187,6 +195,8 @@ Method                            | Type                    | Values
 `$buffer->getInt()`               | int (4 bytes)           | -2147483648 ... 2147483647
 `$buffer->getUnsignedInt()`       | unsigned int (uint)     | 0 ... 4294967296
 `$buffer->getLong()`              | long (8 bytes)          | -9223372036854775808 ... 9223372036854775807
+`$buffer->getFloat()`             | float (4 bytes)         | single-precision 32-bit IEEE 754 floating point number
+`$buffer->getDouble()`            | double (5 bytes)        | double-precision 64-bit IEEE 754 floating point number
 `$buffer->getArrayBytes($length)` | byte[]                  | `array`
 `$buffer->getString($length)`     | string (length bytes)   | `string`
 `$buffer->getUTF()`               | string                  | `string`
@@ -234,6 +244,14 @@ $buffer->insertInt($intValue);
 Insert long value (-9223372036854775808 >= long <= 9223372036854775807). Change position +8.
 ```php
 $buffer->insertLong($longValue);
+```
+Insert float value (single-precision 32-bit IEEE 754 floating point number). Change position +4.
+```php
+$buffer->insertFloat($floatValue);
+```
+Insert double value (double-precision 64-bit IEEE 754 floating point number). Change position +8.
+```php
+$buffer->insertDouble($doubleValue);
 ```
 Insert array bytes. Change size and position by +(size array).
 ```php
@@ -293,6 +311,14 @@ Put long value (-9223372036854775808 >= long <= 9223372036854775807). Change pos
 ```php
 $buffer->putLong($longValue);
 ```
+Put float value (single-precision 32-bit IEEE 754 floating point number). Change position +4.
+```php
+$buffer->putFloat($floatValue);
+```
+Put double value (double-precision 64-bit IEEE 754 floating point number). Change position +8.
+```php
+$buffer->putDouble($doubleValue);
+```
 Put array bytes. Change position by +(size array).
 ```php
 $buffer->putArrayBytes($bytes);
@@ -350,6 +376,14 @@ $buffer->replaceInt($intValue, $length);
 Replace by long value (-9223372036854775808 >= long <= 9223372036854775807). Change size by (-$length + 8) and position +8.
 ```php
 $buffer->replaceLong($longValue, $length);
+```
+Replace by float value (single-precision 32-bit IEEE 754 floating point number). Change size by (-$length + 4) and position +4.
+```php
+$buffer->replaceFloat($floatValue, $length);
+```
+Replace by double value (double-precision 64-bit IEEE 754 floating point number). Change size by (-$length + 8) and position +8.
+```php
+$buffer->replaceDouble($doubleValue, $length);
 ```
 Replace by array bytes. Change size by (-$length + size array) and position +(size array).
 ```php
