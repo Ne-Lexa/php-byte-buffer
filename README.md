@@ -2,7 +2,8 @@
 
 [![Packagist Version](https://img.shields.io/packagist/v/nelexa/buffer.svg)](https://packagist.org/packages/nelexa/buffer)
 [![Packagist](https://img.shields.io/packagist/dt/nelexa/buffer.svg?color=%23ff007f)](https://packagist.org/packages/nelexa/buffer)
-[![Build Status](https://travis-ci.org/Ne-Lexa/php-buffer.svg?branch=master)](https://travis-ci.org/Ne-Lexa/php-buffer)
+[![Build Status](https://travis-ci.org/Ne-Lexa/php-byte-buffer.svg?branch=master)](https://travis-ci.org/Ne-Lexa/php-byte-buffer
+)
 [![License](https://img.shields.io/packagist/l/nelexa/buffer.svg)](https://packagist.org/packages/nelexa/buffer)
 
 This is classes defines methods for **reading and writing** values of all primitive types. Primitive values are translated to (or from) sequences of bytes according to the buffer's current byte order, which may be retrieved and modified via the order methods. The initial order of a byte buffer is always Buffer::BIG_ENDIAN.
