@@ -197,6 +197,7 @@ Method                            | Type                    | Values
 `$buffer->getFloat()`             | float (4 bytes)         | single-precision 32-bit IEEE 754 floating point number
 `$buffer->getDouble()`            | double (5 bytes)        | double-precision 64-bit IEEE 754 floating point number
 `$buffer->getArrayBytes($length)` | byte[]                  | `array`
+`$buffer->getArrayUnsignedBytes($length)` | unsigned byte[]         | `array`
 `$buffer->getString($length)`     | string (length bytes)   | `string`
 `$buffer->getUTF()`               | string                  | `string`
 `$buffer->getUTF16($length)`      | string (length * 2)     | `string`

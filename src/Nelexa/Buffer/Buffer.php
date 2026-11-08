@@ -381,6 +381,23 @@ abstract class Buffer
     }
 
     /**
+     * Reads $length unsigned bytes from an input stream.
+     *
+     * @param $length int
+     * @return int[]
+     * @throws BufferException
+     */
+    public function getArrayUnsignedBytes($length)
+    {
+        if ($length > 0) {
+            return array_values(
+                unpack('C*', $this->get($length))
+            );
+        }
+        return [];
+    }
+
+    /**
      * Reads in a string that has been encoded using
      * a modified UTF-8 format.
      *

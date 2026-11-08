@@ -153,6 +153,9 @@ abstract class BufferTestCase extends TestCase
             $arrayBytes = [0x01, 0x02, 0x03, 0x4, Cast::toByte(Cast::INTEGER_MAX_VALUE)];
             $this->buffer->insertArrayBytes($arrayBytes);
 
+            $arrayUnsignedBytes = [0x01, 0x22, 0x7f, 0xee, Cast::toUnsignedByte(Cast::INTEGER_MAX_VALUE)];
+            $this->buffer->insertArrayBytes($arrayUnsignedBytes);
+
             $string = 'String... Строка... 串...
  😀 😬 😁 😂 😃 😄 😅 😆 😇 😉 😊 😊 🙂 🙃 ☺️ 😋 😌 😍 😘 
  🇦🇫 🇦🇽 🇦🇱 🇩🇿 🇦🇸 🇦🇩 🇦🇴 🇦🇮 🇦🇶 🇦🇬 🇦🇷 🇦🇲 🇦🇼 🇦🇺 🇦🇹
@@ -262,17 +265,20 @@ abstract class BufferTestCase extends TestCase
             $this->assertEquals($this->buffer->getArrayBytes(5), $arrayBytes);
             $this->assertEquals($this->buffer->position(), 76);
 
+            $this->assertEquals($this->buffer->getArrayUnsignedBytes(5), $arrayUnsignedBytes);
+            $this->assertEquals($this->buffer->position(), 81);
+
             $this->assertEquals($this->buffer->getString($lengthString), $string);
-            $this->assertEquals($this->buffer->position(), 76 + $lengthString);
+            $this->assertEquals($this->buffer->position(), 81 + $lengthString);
 
             $this->assertEquals($this->buffer->getUTF(), $string);
-            $this->assertEquals($this->buffer->position(), 78 + $lengthString * 2);
+            $this->assertEquals($this->buffer->position(), 83 + $lengthString * 2);
 
             $this->assertEquals($this->buffer->getUTF16($lengthString), $string);
-            $this->assertEquals($this->buffer->position(), 78 + $lengthString * 4);
+            $this->assertEquals($this->buffer->position(), 83 + $lengthString * 4);
 
             $this->assertEquals($this->buffer->getString($lengthString), $otherBuffer->toString());
-            $this->assertEquals($this->buffer->position(), 78 + $lengthString * 5);
+            $this->assertEquals($this->buffer->position(), 83 + $lengthString * 5);
         }
     }
 
@@ -550,6 +556,9 @@ abstract class BufferTestCase extends TestCase
 
         $buffer->rewind();
         $this->assertEquals($buffer->getArrayBytes(8), [64, 41, 85, 54, 37, 109, -74, 71]);
+
+        $buffer->rewind();
+        $this->assertEquals($buffer->getArrayUnsignedBytes(8), [64, 41, 85, 54, 37, 109, 182, 71]);
     }
 
     /**
@@ -574,5 +583,8 @@ abstract class BufferTestCase extends TestCase
 
         $buffer->rewind();
         $this->assertEquals($buffer->getArrayBytes(4), [65, 74, -87, -79]);
+
+        $buffer->rewind();
+        $this->assertEquals($buffer->getArrayUnsignedBytes(4), [65, 74, 169, 177]);
     }
 }
