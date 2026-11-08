@@ -530,7 +530,6 @@ abstract class BufferTestCase extends TestCase
 
     /**
      * @throws BufferException
-     * @requires PHP 7.0.15
      */
     public function testDouble()
     {
@@ -555,7 +554,6 @@ abstract class BufferTestCase extends TestCase
 
     /**
      * @throws BufferException
-     * @requires PHP 7.0.15
      */
     public function testFloat()
     {
