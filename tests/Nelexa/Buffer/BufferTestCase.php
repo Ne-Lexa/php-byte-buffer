@@ -4,6 +4,7 @@ namespace Nelexa\Buffer;
 
 use Nelexa\Buffer\BinaryFormat\BinaryFileItem;
 use Nelexa\Buffer\BinaryFormat\BinaryFileTestFormat;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Base class for tests all type buffers.
@@ -12,7 +13,7 @@ use Nelexa\Buffer\BinaryFormat\BinaryFileTestFormat;
  *
  * @package Nelexa\Buffer
  */
-abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
+abstract class BufferTestCase extends TestCase
 {
 
     /**
@@ -25,7 +26,7 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
      *
      * @throws \AssertionError
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->buffer = $this->createBuffer();
@@ -34,7 +35,7 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         }
     }
 
-    protected function tearDown()
+    protected function tearDown(): void
     {
         parent::tearDown();
         $this->buffer->close();
@@ -325,54 +326,49 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $this->assertEquals('123789', $this->buffer->toString());
     }
 
-    /**
-     * @expectedException \Nelexa\Buffer\BufferException
-     * @expectedExceptionMessage put length > remaining
-     */
     public function testPutException()
     {
+        $this->expectException(BufferException::class);
+        $this->expectExceptionMessage('put length > remaining');
+
         $this->assertEquals($this->buffer->size(), 0);
         $this->buffer->putString('Test');
     }
 
-    /**
-     * @expectedException \Nelexa\Buffer\BufferException
-     * @expectedExceptionMessage put length > remaining
-     */
     public function testPutException2()
     {
+        $this->expectException(BufferException::class);
+        $this->expectExceptionMessage('put length > remaining');
+
         $this->buffer
             ->insertString('Test')
             ->rewind()
             ->putString('My Test');
     }
 
-    /**
-     * @expectedException \Nelexa\Buffer\BufferException
-     * @expectedExceptionMessage replace length > remaining
-     */
     public function testReplaceException()
     {
+        $this->expectException(BufferException::class);
+        $this->expectExceptionMessage('replace length > remaining');
+
         $this->assertEquals($this->buffer->size(), 0);
         $this->buffer->replaceString('Test', 5);
     }
 
-    /**
-     * @expectedException \Nelexa\Buffer\BufferException
-     * @expectedExceptionMessage remove length > remaining
-     */
     public function testRemoveException()
     {
+        $this->expectException(BufferException::class);
+        $this->expectExceptionMessage('remove length > remaining');
+
         $this->assertEquals($this->buffer->size(), 0);
         $this->buffer->remove(1);
     }
 
-    /**
-     * @expectedException \Nelexa\Buffer\BufferException
-     * @expectedExceptionMessage Read Only
-     */
     public function testReadOnly()
     {
+        $this->expectException(BufferException::class);
+        $this->expectExceptionMessage('Read Only');
+
         $this->assertEquals($this->buffer->isReadOnly(), false);
         $this->buffer->setReadOnly(true);
         $this->assertEquals($this->buffer->isReadOnly(), true);
@@ -570,7 +566,7 @@ abstract class BufferTestCase extends \PHPUnit_Framework_TestCase
         $this->assertEquals($buffer->size(), 4);
 
         $buffer->rewind();
-        $this->assertEquals($buffer->getFloat(), $float);
+        $this->assertEqualsWithDelta($buffer->getFloat(), $float, 0.0001);
         $this->assertEquals($buffer->position(), 4);
 
         $buffer->rewind();
