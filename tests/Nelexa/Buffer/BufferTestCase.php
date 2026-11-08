@@ -324,6 +324,7 @@ abstract class BufferTestCase extends TestCase
         $this->buffer->setPosition(3);
         $this->buffer->remove(3);
         $this->assertEquals('123789', $this->buffer->toString());
+        $this->assertEquals(3, $this->buffer->position());
     }
 
     public function testPutException()
